@@ -49,8 +49,7 @@ export async function POST(request: NextRequest) {
       id: string; name: string; gifUrl: string; target: string;
       secondaryMuscles: string[]; equipment: string; instructions: string[]
     }) => ({
-      wger_id: 0,
-      exercisedb_id: ex.id,
+      wger_id: parseInt(ex.id, 10) || 0,   // ExerciseDB IDs are "0001", "0002" etc.
       name: ex.name,
       muscle_groups: [ex.target, ...(ex.secondaryMuscles ?? [])],
       equipment: [ex.equipment],
@@ -60,7 +59,7 @@ export async function POST(request: NextRequest) {
 
     const { error } = await supabase
       .from('exercises')
-      .upsert(rows, { onConflict: 'name' })
+      .upsert(rows, { onConflict: 'wger_id' })
 
     if (error) errors.push(`offset ${offset}: ${error.message}`)
     else total += rows.length
