@@ -73,9 +73,9 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({ exercise: null, _raw: result })
 
   const exercise = {
-    name: result.name,
-    muscle_groups: [result.target, ...result.secondaryMuscles],
-    equipment: [result.equipment],
+    name: result!.name,
+    muscle_groups: [result!.target, ...result!.secondaryMuscles],
+    equipment: [result!.equipment],
     gif_url: result.gifUrl,
     description: result.instructions.slice(0, 3).join(' '),
   }
