@@ -4,23 +4,36 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthForm() {
-  const [email, setEmail] = useState('')
+  const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
-  const [sent, setSent] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const supabase = createClient()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    const trimmed = name.trim()
+    if (!trimmed) return
     setLoading(true)
     setError(null)
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: window.location.origin },
+
+    const supabase = createClient()
+
+    // Sign in anonymously — no email or password needed
+    const { data, error: signInError } = await supabase.auth.signInAnonymously()
+    if (signInError || !data.user) {
+      setError(signInError?.message ?? 'Could not sign in. Try again.')
+      setLoading(false)
+      return
+    }
+
+    // Save the name to the profile
+    await supabase.from('profiles').upsert({
+      id: data.user.id,
+      name: trimmed,
+      fitness_level: 'intermediate',
+      default_equipment: [],
     })
-    setLoading(false)
-    if (error) setError(error.message)
-    else setSent(true)
+
+    // Auth state change in page.tsx will pick up the new session automatically
   }
 
   return (
@@ -29,35 +42,28 @@ export default function AuthForm() {
         <h1 className="text-3xl font-bold text-white mb-2">GymGen</h1>
         <p className="text-[var(--muted)] mb-8">AI-powered workout generator</p>
 
-        {sent ? (
-          <div className="bg-green-500/10 border border-green-500/30 rounded-2xl p-6 text-center">
-            <div className="text-2xl mb-2">✉️</div>
-            <p className="text-white font-medium">Check your email</p>
-            <p className="text-[var(--muted)] text-sm mt-1">We sent a magic link to {email}</p>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="block text-sm text-[var(--muted)] mb-2">What's your name?</label>
+            <input
+              type="text"
+              required
+              autoFocus
+              value={name}
+              onChange={e => setName(e.target.value)}
+              placeholder="Your name"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
+            />
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div>
-              <label className="block text-sm text-[var(--muted)] mb-2">Email address</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
-              />
-            </div>
-            {error && <p className="text-red-400 text-sm">{error}</p>}
-            <button
-              type="submit"
-              disabled={loading}
-              className="bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-semibold rounded-xl py-3 transition-colors"
-            >
-              {loading ? 'Sending…' : 'Continue with Email'}
-            </button>
-          </form>
-        )}
+          {error && <p className="text-red-400 text-sm">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading || !name.trim()}
+            className="bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-xl py-3 transition-colors"
+          >
+            {loading ? 'Just a sec…' : "Let's go →"}
+          </button>
+        </form>
       </div>
     </div>
   )
