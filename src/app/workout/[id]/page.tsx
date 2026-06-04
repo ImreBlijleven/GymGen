@@ -5,13 +5,19 @@ import { useRouter } from 'next/navigation'
 import type { Workout, Exercise } from '@/lib/types'
 import { findLocalExercise, type LocalExercise } from '@/lib/exerciseDB'
 
+interface ExerciseEnriched {
+  local: LocalExercise | null   // immediate: metadata from local JSON
+  gifUrl: string | null          // async: GIF from ExerciseDB via API
+  gifLoading: boolean
+}
+
 export default function WorkoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
   const [workout, setWorkout] = useState<Workout | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [exerciseData, setExerciseData] = useState<Record<string, LocalExercise | null>>({})
+  const [exerciseData, setExerciseData] = useState<Record<string, ExerciseEnriched>>({})
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [wakeLockSupported, setWakeLockSupported] = useState(false)
@@ -35,11 +41,28 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
     return () => { lock?.release() }
   }, [workout])
 
-  // Look up exercise image from local DB (no API call)
   const fetchExercise = useCallback(async (name: string) => {
     if (name in exerciseData) return
-    const found = await findLocalExercise(name)
-    setExerciseData(prev => ({ ...prev, [name]: found }))
+
+    // Step 1: instant local metadata (muscles, instructions) — no API call
+    const local = await findLocalExercise(name)
+    setExerciseData(prev => ({ ...prev, [name]: { local, gifUrl: null, gifLoading: true } }))
+
+    // Step 2: fetch animated GIF from ExerciseDB via our cached API route
+    try {
+      const res = await fetch(`/api/exercises?name=${encodeURIComponent(name)}`)
+      const data = await res.json()
+      const gifUrl = data.exercise?.gif_url ?? null
+      setExerciseData(prev => ({
+        ...prev,
+        [name]: { ...prev[name], gifUrl, gifLoading: false },
+      }))
+    } catch {
+      setExerciseData(prev => ({
+        ...prev,
+        [name]: { ...prev[name], gifLoading: false },
+      }))
+    }
   }, [exerciseData])
 
   useEffect(() => {
@@ -84,7 +107,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
   const exercises = workout.plan.exercises
   const exercise = exercises[currentIndex]
-  const enriched = exercise.name in exerciseData ? exerciseData[exercise.name] : undefined
+  const enriched = exerciseData[exercise.name]
   const isLast = currentIndex === exercises.length - 1
   const progress = ((currentIndex) / exercises.length) * 100
 
@@ -129,32 +152,35 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        {/* Exercise image */}
-        {enriched === undefined ? (
-          // Still fetching
+        {/* Exercise GIF */}
+        {!enriched || enriched.gifLoading ? (
           <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
             <div className="w-6 h-6 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
           </div>
-        ) : enriched?.imageUrl ? (
+        ) : enriched.gifUrl ? (
           <div className="rounded-2xl overflow-hidden bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
-            <img src={enriched.imageUrl} alt={exercise.name} className="w-full h-full object-contain" />
+            <img
+              src={enriched.gifUrl}
+              alt={exercise.name}
+              className="w-full h-full object-contain"
+              loading="lazy"
+            />
           </div>
         ) : (
-          // WGER has no image for this exercise
           <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex flex-col items-center justify-center gap-2">
             <span className="text-4xl">🏋️</span>
-            <span className="text-[var(--muted)] text-sm">No image available</span>
+            <span className="text-[var(--muted)] text-sm">No demo available</span>
           </div>
         )}
 
-        {enriched?.instructions?.[0] && (
-          <p className="text-[var(--muted)] text-sm mb-6">{enriched.instructions[0]}</p>
+        {enriched?.local?.instructions?.[0] && (
+          <p className="text-[var(--muted)] text-sm mb-6">{enriched.local.instructions[0]}</p>
         )}
 
         {/* Muscles */}
-        {(enriched?.primaryMuscles ?? []).length > 0 && (
+        {(enriched?.local?.primaryMuscles ?? []).length > 0 && (
           <div className="flex gap-2 flex-wrap mb-4">
-            {(enriched?.primaryMuscles ?? []).map(m => (
+            {(enriched?.local?.primaryMuscles ?? []).map(m => (
               <span key={m} className="text-xs px-2 py-1 rounded-lg bg-[var(--surface-2)] text-[var(--muted)] capitalize">{m}</span>
             ))}
           </div>
