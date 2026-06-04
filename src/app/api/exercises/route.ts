@@ -65,10 +65,12 @@ export async function GET(request: NextRequest) {
   const { result, error: apiError } = await searchExerciseDB(name)
 
   if (!result) {
-    // Return debug info in dev, generic null in prod
     console.error(`[exercises] ${name}: ${apiError}`)
     return NextResponse.json({ exercise: null, _debug: apiError })
   }
+
+  // Temporary: expose raw result to diagnose missing gifUrl
+  return NextResponse.json({ exercise: null, _raw: result })
 
   const exercise = {
     name: result.name,
