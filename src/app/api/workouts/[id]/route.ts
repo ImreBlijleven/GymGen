@@ -16,6 +16,6 @@ export async function DELETE(
     .eq('id', id)
     .eq('user_id', user.id)
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error) return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
   return new NextResponse(null, { status: 204 })
 }

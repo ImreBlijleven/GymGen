@@ -4,6 +4,11 @@ import { findExercise } from '@/lib/wger'
 
 export async function GET(request: NextRequest) {
   const supabase = await createClient()
+
+  // Auth required — exercises endpoint proxies WGER and writes to shared cache
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
   const { searchParams } = new URL(request.url)
   const name = searchParams.get('name')
   const muscleGroup = searchParams.get('muscle_group')
@@ -13,7 +18,7 @@ export async function GET(request: NextRequest) {
       .from('exercises')
       .select('*')
       .contains('muscle_groups', [muscleGroup])
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    if (error) return NextResponse.json({ error: "Something went wrong" }, { status: 500 })
     return NextResponse.json({ exercises: data })
   }
 

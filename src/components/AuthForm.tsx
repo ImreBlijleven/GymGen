@@ -4,36 +4,25 @@ import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 export default function AuthForm() {
-  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    const trimmed = name.trim()
-    if (!trimmed) return
     setLoading(true)
     setError(null)
 
     const supabase = createClient()
+    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
 
-    // Sign in anonymously — no email or password needed
-    const { data, error: signInError } = await supabase.auth.signInAnonymously()
-    if (signInError || !data.user) {
-      setError(signInError?.message ?? 'Could not sign in. Try again.')
+    if (signInError) {
+      // Generic message — don't reveal whether the email exists
+      setError('Incorrect email or password.')
       setLoading(false)
-      return
     }
-
-    // Save the name to the profile
-    await supabase.from('profiles').upsert({
-      id: data.user.id,
-      name: trimmed,
-      fitness_level: 'intermediate',
-      default_equipment: [],
-    })
-
-    // Auth state change in page.tsx will pick up the new session automatically
+    // On success the onAuthStateChange listener in page.tsx picks up the session automatically
   }
 
   return (
@@ -44,24 +33,35 @@ export default function AuthForm() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm text-[var(--muted)] mb-2">What's your name?</label>
+            <label className="block text-sm text-[var(--muted)] mb-2">Email</label>
             <input
-              type="text"
+              type="email"
               required
               autoFocus
-              value={name}
-              onChange={e => setName(e.target.value)}
-              placeholder="Your name"
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              placeholder="you@example.com"
+              className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
+            />
+          </div>
+          <div>
+            <label className="block text-sm text-[var(--muted)] mb-2">Password</label>
+            <input
+              type="password"
+              required
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              placeholder="••••••••"
               className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
             />
           </div>
           {error && <p className="text-red-400 text-sm">{error}</p>}
           <button
             type="submit"
-            disabled={loading || !name.trim()}
+            disabled={loading}
             className="bg-green-500 hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed text-black font-semibold rounded-xl py-3 transition-colors"
           >
-            {loading ? 'Just a sec…' : "Let's go →"}
+            {loading ? 'Signing in…' : 'Sign in'}
           </button>
         </form>
       </div>

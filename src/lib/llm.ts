@@ -67,7 +67,13 @@ async function callGemini(systemPrompt: string, userPrompt: string): Promise<Wor
   })
   const result = await model.generateContent(userPrompt)
   const text = result.response.text().trim()
-  return JSON.parse(text) as WorkoutPlan
+  // Strip markdown fences if the model wraps the JSON despite instructions
+  const json = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+  try {
+    return JSON.parse(json) as WorkoutPlan
+  } catch {
+    throw new Error('Gemini returned invalid JSON')
+  }
 }
 
 async function callGroq(systemPrompt: string, userPrompt: string): Promise<WorkoutPlan> {
@@ -89,7 +95,12 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<Worko
   if (!response.ok) throw new Error(`Groq error: ${response.status}`)
   const data = await response.json()
   const text = data.choices[0].message.content.trim()
-  return JSON.parse(text) as WorkoutPlan
+  const json = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+  try {
+    return JSON.parse(json) as WorkoutPlan
+  } catch {
+    throw new Error('Groq returned invalid JSON')
+  }
 }
 
 const FALLBACK_PLAN: WorkoutPlan = {
