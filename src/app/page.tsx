@@ -9,9 +9,9 @@ import AuthForm from '@/components/AuthForm'
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
-  const supabase = createClient()
 
   useEffect(() => {
+    const supabase = createClient()
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user)
       setLoading(false)

@@ -10,13 +10,13 @@ const EQUIPMENT_OPTIONS = ['barbell', 'dumbbell', 'kettlebell', 'resistance band
 
 export default function ProfilePage() {
   const router = useRouter()
-  const supabase = createClient()
   const [profile, setProfile] = useState<Partial<Profile>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
   useEffect(() => {
+    const supabase = createClient()
     supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) { router.push('/'); return }
       const { data: p } = await supabase.from('profiles').select('*').eq('id', data.user.id).single()
@@ -26,6 +26,7 @@ export default function ProfilePage() {
   }, [])
 
   async function save() {
+    const supabase = createClient()
     setSaving(true)
     const { data: { user } } = await supabase.auth.getUser()
     if (!user) return
