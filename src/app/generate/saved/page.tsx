@@ -39,8 +39,7 @@ export default function SavedPage() {
       })
       const saved = await saveRes.json()
       router.push(`/workout/${saved.workout.id}`)
-    } catch (e) {
-      console.error(e)
+    } catch {
       setGenerating(null)
     }
   }
