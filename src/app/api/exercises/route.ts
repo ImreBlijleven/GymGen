@@ -76,8 +76,8 @@ export async function GET(request: NextRequest) {
     name: result!.name,
     muscle_groups: [result!.target, ...result!.secondaryMuscles],
     equipment: [result!.equipment],
-    gif_url: result.gifUrl,
-    description: result.instructions.slice(0, 3).join(' '),
+    gif_url: result!.gifUrl,
+    description: result!.instructions.slice(0, 3).join(' '),
   }
 
   // 3. Cache in Supabase (best-effort — don't let cache failure block the response)
