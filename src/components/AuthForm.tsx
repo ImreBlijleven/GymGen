@@ -3,8 +3,11 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
+// Supabase requires an email internally — we use a fixed domain so users only ever see a username
+const toEmail = (username: string) => `${username.toLowerCase().trim()}@gymgen.app`
+
 export default function AuthForm() {
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -15,11 +18,13 @@ export default function AuthForm() {
     setError(null)
 
     const supabase = createClient()
-    const { error: signInError } = await supabase.auth.signInWithPassword({ email, password })
+    const { error: signInError } = await supabase.auth.signInWithPassword({
+      email: toEmail(username),
+      password,
+    })
 
     if (signInError) {
-      // Generic message — don't reveal whether the email exists
-      setError('Incorrect email or password.')
+      setError('Incorrect username or password.')
       setLoading(false)
     }
     // On success the onAuthStateChange listener in page.tsx picks up the session automatically
@@ -33,14 +38,16 @@ export default function AuthForm() {
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="block text-sm text-[var(--muted)] mb-2">Email</label>
+            <label className="block text-sm text-[var(--muted)] mb-2">Username</label>
             <input
-              type="email"
+              type="text"
               required
               autoFocus
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              placeholder="you@example.com"
+              autoComplete="username"
+              autoCapitalize="none"
+              value={username}
+              onChange={e => setUsername(e.target.value)}
+              placeholder="your username"
               className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
             />
           </div>
@@ -49,6 +56,7 @@ export default function AuthForm() {
             <input
               type="password"
               required
+              autoComplete="current-password"
               value={password}
               onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"
