@@ -3,11 +3,10 @@
 import { useEffect, useState, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Workout, Exercise } from '@/lib/types'
+import { findGif } from '@/lib/exerciseGifs'
 
 interface ExerciseEnriched {
   gifUrl: string | null
-  muscles: string[]
-  instructions: string[]
   gifLoading: boolean
 }
 
@@ -43,26 +42,9 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
   const fetchExercise = useCallback(async (name: string) => {
     if (name in exerciseData) return
-
-    // Mark as loading immediately
-    setExerciseData(prev => ({ ...prev, [name]: { gifUrl: null, muscles: [], instructions: [], gifLoading: true } }))
-
-    try {
-      const res = await fetch(`/api/exercises?name=${encodeURIComponent(name)}`)
-      const data = await res.json()
-      const ex = data.exercise
-      setExerciseData(prev => ({
-        ...prev,
-        [name]: {
-          gifUrl: ex?.gif_url ?? null,
-          muscles: ex?.muscle_groups ?? [],
-          instructions: ex?.description ? [ex.description] : [],
-          gifLoading: false,
-        },
-      }))
-    } catch {
-      setExerciseData(prev => ({ ...prev, [name]: { gifUrl: null, muscles: [], instructions: [], gifLoading: false } }))
-    }
+    setExerciseData(prev => ({ ...prev, [name]: { gifUrl: null, gifLoading: true } }))
+    const gifUrl = await findGif(name).catch(() => null)
+    setExerciseData(prev => ({ ...prev, [name]: { gifUrl, gifLoading: false } }))
   }, [exerciseData])
 
   useEffect(() => {
@@ -173,18 +155,6 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        {enriched?.instructions?.[0] && (
-          <p className="text-[var(--muted)] text-sm mb-6">{enriched.instructions[0]}</p>
-        )}
-
-        {/* Muscles */}
-        {(enriched?.muscles ?? []).length > 0 && (
-          <div className="flex gap-2 flex-wrap mb-4">
-            {(enriched?.muscles ?? []).map(m => (
-              <span key={m} className="text-xs px-2 py-1 rounded-lg bg-[var(--surface-2)] text-[var(--muted)] capitalize">{m}</span>
-            ))}
-          </div>
-        )}
       </div>
 
       {/* Footer */}
