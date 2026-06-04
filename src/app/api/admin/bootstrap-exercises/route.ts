@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   let total = 0
   let offset = 0
-  const limit = 100
+  const limit = 10  // ExerciseDB free tier caps at 10 results per request
   const errors: string[] = []
 
   // Paginate through all exercises
