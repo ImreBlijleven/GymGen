@@ -14,24 +14,23 @@ export async function GET(request: NextRequest) {
   // Exact match first
   const { data: exact } = await supabase
     .from('exercises')
-    .select('*')
+    .select('name, gif_url, muscle_groups, equipment, description')
     .ilike('name', name)
     .maybeSingle()
 
-  if (exact?.gif_url) return NextResponse.json({ exercise: exact })
+  if (exact) return NextResponse.json({ exercise: exact, _found: 'exact' })
 
-  // Fuzzy: search for any exercise whose name contains one of the key words
+  // Fuzzy: search for any exercise whose name contains key words
   const words = name.split(' ').filter(w => w.length > 3)
   if (words.length > 0) {
     const { data: fuzzy } = await supabase
       .from('exercises')
-      .select('*')
+      .select('name, gif_url, muscle_groups, equipment, description')
       .textSearch('name', words.join(' | '), { config: 'english' })
       .limit(5)
 
-    const match = fuzzy?.find(e => e.gif_url)
-    if (match) return NextResponse.json({ exercise: match })
+    if (fuzzy?.length) return NextResponse.json({ exercise: fuzzy[0], _found: 'fuzzy', _all: fuzzy.map(e => e.name) })
   }
 
-  return NextResponse.json({ exercise: null })
+  return NextResponse.json({ exercise: null, _debug: `No match for "${name}"` })
 }
