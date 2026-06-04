@@ -131,14 +131,21 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        {/* GIF */}
-        {enriched?.gif_url ? (
+        {/* Exercise image */}
+        {enriched === undefined ? (
+          // Still fetching
+          <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
+            <div className="w-6 h-6 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+          </div>
+        ) : enriched?.gif_url ? (
           <div className="rounded-2xl overflow-hidden bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
             <img src={enriched.gif_url} alt={exercise.name} className="w-full h-full object-contain" />
           </div>
         ) : (
-          <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
-            <span className="text-[var(--muted)] text-sm">Loading animation…</span>
+          // WGER has no image for this exercise
+          <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex flex-col items-center justify-center gap-2">
+            <span className="text-4xl">🏋️</span>
+            <span className="text-[var(--muted)] text-sm">No image available</span>
           </div>
         )}
 
