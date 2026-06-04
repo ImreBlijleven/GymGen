@@ -12,34 +12,46 @@ interface ExerciseDBResult {
   instructions: string[]
 }
 
+// Try multiple name variants to maximise match rate
+function nameVariants(name: string): string[] {
+  const lower = name.toLowerCase()
+  const title = name.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+  return [...new Set([lower, title, name])]
+}
+
 async function searchExerciseDB(name: string): Promise<{ result: ExerciseDBResult | null; error?: string }> {
   const key = process.env.RAPIDAPI_KEY
   if (!key) return { result: null, error: 'RAPIDAPI_KEY not set' }
 
-  const url = `https://exercisedb.p.rapidapi.com/exercises/name/${encodeURIComponent(name.toLowerCase())}?limit=5`
-
-  let res: Response
-  try {
-    res = await fetch(url, {
-      headers: {
-        'X-RapidAPI-Key': key,
-        'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com',
-      },
-    })
-  } catch (e) {
-    return { result: null, error: `Fetch failed: ${e}` }
+  const headers = {
+    'X-RapidAPI-Key': key,
+    'X-RapidAPI-Host': 'exercisedb.p.rapidapi.com',
   }
 
-  if (!res.ok) {
-    const body = await res.text().catch(() => '')
-    return { result: null, error: `ExerciseDB ${res.status}: ${body.slice(0, 100)}` }
+  // Try each name variant until we get results
+  for (const variant of nameVariants(name)) {
+    const url = `https://exercisedb.p.rapidapi.com/exercises/name/${encodeURIComponent(variant)}?limit=5`
+    let res: Response
+    try {
+      res = await fetch(url, { headers })
+    } catch (e) {
+      return { result: null, error: `Fetch failed: ${e}` }
+    }
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      return { result: null, error: `ExerciseDB ${res.status}: ${body.slice(0, 200)}` }
+    }
+
+    const results: ExerciseDBResult[] = await res.json()
+    if (!results?.length) continue
+
+    // Prefer exact name match, otherwise first result
+    const exact = results.find(r => r.name.toLowerCase() === name.toLowerCase())
+    return { result: exact ?? results[0] }
   }
 
-  const results: ExerciseDBResult[] = await res.json()
-  if (!results?.length) return { result: null, error: `No results for "${name}"` }
-
-  const exact = results.find(r => r.name.toLowerCase() === name.toLowerCase())
-  return { result: exact ?? results[0] }
+  return { result: null, error: `No results for "${name}" (tried ${nameVariants(name).join(', ')})` }
 }
 
 export async function GET(request: NextRequest) {
@@ -52,7 +64,7 @@ export async function GET(request: NextRequest) {
   const name = searchParams.get('name')
   if (!name) return NextResponse.json({ error: 'name required' }, { status: 400 })
 
-  // 1. Check Supabase cache first
+  // 1. Check Supabase cache first (only if there's a real gif_url)
   const { data: cached } = await supabase
     .from('exercises')
     .select('*')
@@ -69,8 +81,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ exercise: null, _debug: apiError })
   }
 
-  // Temporary: expose raw result to diagnose missing gifUrl
-  return NextResponse.json({ exercise: null, _raw: result })
+  // DEBUG: return raw ExerciseDB result to verify gifUrl field
+  return NextResponse.json({ _raw: result, _keys: Object.keys(result) })
 
   const exercise = {
     name: result!.name,
@@ -80,7 +92,7 @@ export async function GET(request: NextRequest) {
     description: result!.instructions.slice(0, 3).join(' '),
   }
 
-  // 3. Cache in Supabase (best-effort — don't let cache failure block the response)
+  // 3. Cache in Supabase (best-effort)
   supabase.from('exercises')
     .upsert({ ...exercise, wger_id: 0 }, { onConflict: 'name' })
     .then(({ error }) => { if (error) console.warn('[exercises] cache write failed:', error.message) })
