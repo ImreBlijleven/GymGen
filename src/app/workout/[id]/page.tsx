@@ -3,11 +3,11 @@
 import { useEffect, useState, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Workout, Exercise } from '@/lib/types'
-import { findLocalExercise, type LocalExercise } from '@/lib/exerciseDB'
 
 interface ExerciseEnriched {
-  local: LocalExercise | null   // immediate: metadata from local JSON
-  gifUrl: string | null          // async: GIF from ExerciseDB via API
+  gifUrl: string | null
+  muscles: string[]
+  instructions: string[]
   gifLoading: boolean
 }
 
@@ -44,24 +44,24 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const fetchExercise = useCallback(async (name: string) => {
     if (name in exerciseData) return
 
-    // Step 1: instant local metadata (muscles, instructions) — no API call
-    const local = await findLocalExercise(name)
-    setExerciseData(prev => ({ ...prev, [name]: { local, gifUrl: null, gifLoading: true } }))
+    // Mark as loading immediately
+    setExerciseData(prev => ({ ...prev, [name]: { gifUrl: null, muscles: [], instructions: [], gifLoading: true } }))
 
-    // Step 2: fetch animated GIF from ExerciseDB via our cached API route
     try {
       const res = await fetch(`/api/exercises?name=${encodeURIComponent(name)}`)
       const data = await res.json()
-      const gifUrl = data.exercise?.gif_url ?? null
+      const ex = data.exercise
       setExerciseData(prev => ({
         ...prev,
-        [name]: { ...prev[name], gifUrl, gifLoading: false },
+        [name]: {
+          gifUrl: ex?.gif_url ?? null,
+          muscles: ex?.muscle_groups ?? [],
+          instructions: ex?.description ? [ex.description] : [],
+          gifLoading: false,
+        },
       }))
     } catch {
-      setExerciseData(prev => ({
-        ...prev,
-        [name]: { ...prev[name], gifLoading: false },
-      }))
+      setExerciseData(prev => ({ ...prev, [name]: { gifUrl: null, muscles: [], instructions: [], gifLoading: false } }))
     }
   }, [exerciseData])
 
@@ -173,14 +173,14 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        {enriched?.local?.instructions?.[0] && (
-          <p className="text-[var(--muted)] text-sm mb-6">{enriched.local.instructions[0]}</p>
+        {enriched?.instructions?.[0] && (
+          <p className="text-[var(--muted)] text-sm mb-6">{enriched.instructions[0]}</p>
         )}
 
         {/* Muscles */}
-        {(enriched?.local?.primaryMuscles ?? []).length > 0 && (
+        {(enriched?.muscles ?? []).length > 0 && (
           <div className="flex gap-2 flex-wrap mb-4">
-            {(enriched?.local?.primaryMuscles ?? []).map(m => (
+            {(enriched?.muscles ?? []).map(m => (
               <span key={m} className="text-xs px-2 py-1 rounded-lg bg-[var(--surface-2)] text-[var(--muted)] capitalize">{m}</span>
             ))}
           </div>
