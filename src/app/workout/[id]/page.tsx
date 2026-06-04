@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback, use } from 'react'
 import { useRouter } from 'next/navigation'
 import type { Workout, Exercise } from '@/lib/types'
+import { findLocalExercise, type LocalExercise } from '@/lib/exerciseDB'
 
 export default function WorkoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -10,7 +11,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const [workout, setWorkout] = useState<Workout | null>(null)
   const [currentIndex, setCurrentIndex] = useState(0)
   const [loading, setLoading] = useState(true)
-  const [exerciseData, setExerciseData] = useState<Record<string, Exercise>>({})
+  const [exerciseData, setExerciseData] = useState<Record<string, LocalExercise | null>>({})
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
   const [wakeLockSupported, setWakeLockSupported] = useState(false)
@@ -34,14 +35,11 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
     return () => { lock?.release() }
   }, [workout])
 
-  // Fetch exercise GIF lazily
+  // Look up exercise image from local DB (no API call)
   const fetchExercise = useCallback(async (name: string) => {
-    if (exerciseData[name]) return
-    const res = await fetch(`/api/exercises?name=${encodeURIComponent(name)}`)
-    const data = await res.json()
-    if (data.exercise) {
-      setExerciseData(prev => ({ ...prev, [name]: data.exercise }))
-    }
+    if (name in exerciseData) return
+    const found = await findLocalExercise(name)
+    setExerciseData(prev => ({ ...prev, [name]: found }))
   }, [exerciseData])
 
   useEffect(() => {
@@ -86,7 +84,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
   const exercises = workout.plan.exercises
   const exercise = exercises[currentIndex]
-  const enriched = exerciseData[exercise.name]
+  const enriched = exercise.name in exerciseData ? exerciseData[exercise.name] : undefined
   const isLast = currentIndex === exercises.length - 1
   const progress = ((currentIndex) / exercises.length) * 100
 
@@ -137,9 +135,9 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
             <div className="w-6 h-6 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
           </div>
-        ) : enriched?.gif_url ? (
+        ) : enriched?.imageUrl ? (
           <div className="rounded-2xl overflow-hidden bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
-            <img src={enriched.gif_url} alt={exercise.name} className="w-full h-full object-contain" />
+            <img src={enriched.imageUrl} alt={exercise.name} className="w-full h-full object-contain" />
           </div>
         ) : (
           // WGER has no image for this exercise
@@ -149,15 +147,15 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           </div>
         )}
 
-        {enriched?.description && (
-          <p className="text-[var(--muted)] text-sm mb-6">{enriched.description.slice(0, 200)}</p>
+        {enriched?.instructions?.[0] && (
+          <p className="text-[var(--muted)] text-sm mb-6">{enriched.instructions[0]}</p>
         )}
 
         {/* Muscles */}
-        {(enriched?.muscle_groups ?? []).length > 0 && (
+        {(enriched?.primaryMuscles ?? []).length > 0 && (
           <div className="flex gap-2 flex-wrap mb-4">
-            {(enriched?.muscle_groups ?? []).map(m => (
-              <span key={m} className="text-xs px-2 py-1 rounded-lg bg-[var(--surface-2)] text-[var(--muted)]">{m}</span>
+            {(enriched?.primaryMuscles ?? []).map(m => (
+              <span key={m} className="text-xs px-2 py-1 rounded-lg bg-[var(--surface-2)] text-[var(--muted)] capitalize">{m}</span>
             ))}
           </div>
         )}

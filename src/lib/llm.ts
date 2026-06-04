@@ -17,24 +17,47 @@ const WORKOUT_SCHEMA = `{
   ]
 }`
 
+// Equipment descriptions to help the LLM generate appropriate exercises
+const EQUIPMENT_CONTEXT: Record<string, string> = {
+  'treadmill':           'running, walking, intervals, incline walking',
+  'elliptical':          'low-impact full-body cardio, stride variations',
+  'stationary bike':     'cycling intervals, steady-state cardio, spin drills',
+  'rowing machine':      'rowing intervals, steady-state rowing — targets back, legs, and core',
+  'stair climber':       'stair climbing, step intervals — targets glutes and quads',
+  'air bike':            'all-out sprints, intervals — full body cardio',
+  'squat rack':          'barbell squats, rack pulls, box squats, barbell lunges',
+  'smith machine':       'guided squats, shoulder press, Romanian deadlift',
+  'leg press':           'leg press variations, single-leg press, calf raises on leg press',
+  'lat pulldown':        'wide-grip lat pulldown, close-grip pulldown, straight-arm pulldown',
+  'chest press machine': 'machine chest press, machine incline press',
+  'cable machine':       'cable flys, cable rows, face pulls, tricep pushdowns, cable curls',
+}
+
 function buildSystemPrompt(profile: Partial<Profile> | null): string {
-  const profileBlock = profile
-    ? `User profile: fitness level = ${profile.fitness_level ?? 'intermediate'}, available equipment = ${(profile.default_equipment ?? []).join(', ') || 'none specified'}.`
-    : 'User profile: fitness level = intermediate, no specific equipment preferences.'
+  const equipment = profile?.default_equipment ?? []
+  const equipmentLines = equipment.length
+    ? equipment.map(e => `  - ${e}${EQUIPMENT_CONTEXT[e] ? ': ' + EQUIPMENT_CONTEXT[e] : ''}`).join('\n')
+    : '  - bodyweight only'
 
   return `You are an expert personal trainer with deep knowledge of exercise science.
-${profileBlock}
+User profile:
+  - Fitness level: ${profile?.fitness_level ?? 'intermediate'}
+  - Age: ${profile?.age ? profile.age + ' years' : 'not specified'}
+  - Available equipment:
+${equipmentLines}
 Today's date: ${new Date().toISOString().split('T')[0]}.
 
 IMPORTANT: You must respond with ONLY valid JSON matching this exact schema — no prose, no markdown fences, no extra text:
 ${WORKOUT_SCHEMA}
 
 Rules:
-- Respect the user's equipment, time limit, and fitness level
+- Only use exercises that match the available equipment listed above
+- Cardio machine exercises: use duration_seconds instead of sets/reps (e.g. 10 min treadmill = duration_seconds: 600)
 - Beginners: avoid complex lifts, prioritise form, lighter intensity
-- Always include rest_seconds for every exercise
-- Add notes when exercise form matters
-- Total exercise time should fit within duration_minutes`
+- Always include rest_seconds for every exercise (0 for cardio steady-state)
+- Add notes when exercise form or machine setup matters
+- Total exercise time should fit within duration_minutes
+- Prefer common exercise names (e.g. "Barbell Bench Press", "Pull-up", "Squat") for better image matching`
 }
 
 function buildChoicesPrompt(choices: ChoicesInput): string {

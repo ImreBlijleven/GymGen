@@ -5,8 +5,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import BackButton from '@/components/BackButton'
 import type { Profile, FitnessLevel } from '@/lib/types'
-
-const EQUIPMENT_OPTIONS = ['barbell', 'dumbbell', 'kettlebell', 'resistance bands', 'pull-up bar', 'cables', 'bodyweight']
+import { EQUIPMENT_GROUPS } from '@/lib/exerciseDB'
 
 export default function ProfilePage() {
   const router = useRouter()
@@ -100,19 +99,26 @@ export default function ProfilePage() {
         </Field>
 
         <Field label="Available Equipment">
-          <div className="grid grid-cols-2 gap-2">
-            {EQUIPMENT_OPTIONS.map(item => (
-              <button
-                key={item}
-                onClick={() => toggleEquipment(item)}
-                className={`py-2.5 px-3 rounded-xl border text-sm capitalize transition-all text-left ${
-                  (profile.default_equipment ?? []).includes(item)
-                    ? 'bg-green-500/20 border-green-500 text-green-400'
-                    : 'bg-[var(--surface)] border-[var(--border)] text-white'
-                }`}
-              >
-                {item}
-              </button>
+          <div className="flex flex-col gap-4">
+            {EQUIPMENT_GROUPS.map(group => (
+              <div key={group.label}>
+                <p className="text-xs text-[var(--muted)] uppercase tracking-wider mb-2">{group.label}</p>
+                <div className="grid grid-cols-2 gap-2">
+                  {group.items.map(item => (
+                    <button
+                      key={item}
+                      onClick={() => toggleEquipment(item)}
+                      className={`py-2.5 px-3 rounded-xl border text-sm capitalize transition-all text-left ${
+                        (profile.default_equipment ?? []).includes(item)
+                          ? 'bg-green-500/20 border-green-500 text-green-400'
+                          : 'bg-[var(--surface)] border-[var(--border)] text-white'
+                      }`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
             ))}
           </div>
         </Field>

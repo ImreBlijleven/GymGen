@@ -12,6 +12,18 @@ export type MuscleGroup =
   | 'full body'
   | 'cardio'
 
+export type Equipment =
+  // Bodyweight
+  | 'bodyweight'
+  // Free weights
+  | 'barbell' | 'dumbbell' | 'kettlebell' | 'e-z curl bar' | 'resistance bands'
+  // Cardio machines
+  | 'treadmill' | 'elliptical' | 'stationary bike' | 'rowing machine' | 'stair climber' | 'air bike'
+  // Strength machines
+  | 'squat rack' | 'smith machine' | 'leg press' | 'lat pulldown' | 'chest press machine' | 'cable machine' | 'machine'
+  // Other
+  | 'exercise ball' | 'medicine ball' | 'foam roller'
+
 export interface Exercise {
   name: string
   sets?: number
