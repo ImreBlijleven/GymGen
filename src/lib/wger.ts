@@ -44,7 +44,7 @@ async function buildIndex(): Promise<ExerciseIndex[]> {
   let url: string | null = 'https://wger.de/api/v2/exerciseinfo/?format=json&limit=100&ordering=id'
 
   while (url) {
-    const res = await fetch(url, { next: { revalidate: 86400 } })
+    const res: Response = await fetch(url, { next: { revalidate: 86400 } })
     if (!res.ok) break
 
     const data = await res.json()
