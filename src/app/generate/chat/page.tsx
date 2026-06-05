@@ -31,7 +31,7 @@ export default function ChatPage() {
         body: JSON.stringify({ plan: data.plan, source: 'chat' }),
       })
       const saved = await saveRes.json()
-      router.push(`/workout/${saved.workout.id}`)
+      router.push(`/workout/${saved.workout.id}/overview`)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
       setLoading(false)

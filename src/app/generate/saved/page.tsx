@@ -77,7 +77,7 @@ export default function SavedPage() {
         body: JSON.stringify({ plan: data.plan, source: 'saved' }),
       })
       const saved = await saveRes.json()
-      router.push(`/workout/${saved.workout.id}`)
+      router.push(`/workout/${saved.workout.id}/overview`)
     } catch {
       setGenerating(null)
     }

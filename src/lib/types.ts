@@ -31,6 +31,7 @@ export interface Exercise {
   duration_seconds?: number
   rest_seconds: number
   notes?: string
+  equipment?: string
   gif_url?: string
   description?: string
   muscle_groups?: string[]

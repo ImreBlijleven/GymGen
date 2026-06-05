@@ -1,4 +1,4 @@
-import { WorkoutPlan, ChoicesInput, Profile, Location, MuscleGroup } from './types'
+import { WorkoutPlan, Exercise, ChoicesInput, Profile, Location, MuscleGroup } from './types'
 
 const WORKOUT_SCHEMA = `{
   "title": "string",
@@ -8,6 +8,7 @@ const WORKOUT_SCHEMA = `{
   "exercises": [
     {
       "name": "string",
+      "equipment": "string (the primary piece of equipment required, e.g. 'barbell', 'dumbbell', 'bodyweight', 'treadmill')",
       "sets": number (optional),
       "reps": number (optional),
       "duration_seconds": number (optional),
@@ -15,6 +16,16 @@ const WORKOUT_SCHEMA = `{
       "notes": "string (optional)"
     }
   ]
+}`
+
+const EXERCISE_SCHEMA = `{
+  "name": "string",
+  "equipment": "string",
+  "sets": number (optional),
+  "reps": number (optional),
+  "duration_seconds": number (optional),
+  "rest_seconds": number,
+  "notes": "string (optional)"
 }`
 
 // Equipment descriptions to help the LLM generate appropriate exercises
@@ -166,6 +177,58 @@ export async function generateFromChat(
   profile: Partial<Profile> | null,
 ): Promise<WorkoutPlan> {
   return generateWithFallback(buildSystemPrompt(profile), buildChatPrompt(message))
+}
+
+export async function generateSwapExercise(
+  plan: WorkoutPlan,
+  exerciseIndex: number,
+  profile: Partial<Profile> | null,
+): Promise<Exercise> {
+  const original = plan.exercises[exerciseIndex]
+  const systemPrompt = buildSystemPrompt(profile)
+  const userPrompt = `Here is the current workout plan:
+${JSON.stringify(plan, null, 2)}
+
+The user wants to swap exercise #${exerciseIndex + 1}: "${original.name}".
+
+Generate ONE replacement exercise that:
+- Targets the same muscle group(s) and matches the same intensity/effort level
+- Uses the same or compatible equipment as "${original.name}"
+- Has similar volume (sets/reps) or duration
+- Is NOT any of the exercises already in the plan
+- Fits within the workout's overall structure
+
+Respond with ONLY valid JSON matching this exact schema — no prose, no markdown:
+${EXERCISE_SCHEMA}`
+
+  const parse = (text: string): Exercise => {
+    const json = text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+    return JSON.parse(json) as Exercise
+  }
+
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai')
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', systemInstruction: systemPrompt })
+    const result = await model.generateContent(userPrompt)
+    return parse(result.response.text())
+  } catch {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+          temperature: 0.7,
+        }),
+      })
+      const data = await response.json()
+      return parse(data.choices[0].message.content)
+    } catch {
+      throw new Error('Failed to generate swap exercise')
+    }
+  }
 }
 
 export async function generateVariation(
