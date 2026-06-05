@@ -128,19 +128,13 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           <Stat label="Rest" value={`${exercise.rest_seconds}s`} />
         </div>
 
-        {exercise.notes && (
-          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 mb-6">
-            <p className="text-green-300 text-sm">💡 {exercise.notes}</p>
-          </div>
-        )}
-
         {/* Exercise GIF */}
         {!enriched || enriched.gifLoading ? (
-          <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
+          <div className="rounded-2xl bg-[var(--surface)] mb-4 aspect-video flex items-center justify-center">
             <div className="w-6 h-6 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
           </div>
         ) : enriched.gifUrl ? (
-          <div className="rounded-2xl overflow-hidden bg-[var(--surface)] mb-6 aspect-video flex items-center justify-center">
+          <div className="rounded-2xl overflow-hidden bg-[var(--surface)] mb-4 aspect-video flex items-center justify-center">
             <img
               src={enriched.gifUrl}
               alt={exercise.name}
@@ -149,9 +143,33 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
             />
           </div>
         ) : (
-          <div className="rounded-2xl bg-[var(--surface)] mb-6 aspect-video flex flex-col items-center justify-center gap-2">
+          <div className="rounded-2xl bg-[var(--surface)] mb-4 aspect-video flex flex-col items-center justify-center gap-2">
             <span className="text-4xl">🏋️</span>
             <span className="text-[var(--muted)] text-sm">No demo available</span>
+          </div>
+        )}
+
+        {/* Instructions */}
+        {(exercise.instructions ?? []).length > 0 && (
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl p-4 mb-3">
+            <p className="text-xs text-[var(--muted)] uppercase tracking-wide font-medium mb-2">How to</p>
+            <ol className="flex flex-col gap-2">
+              {exercise.instructions!.map((step, i) => (
+                <li key={i} className="flex gap-3 text-sm text-white">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-green-500/20 text-green-400 text-xs flex items-center justify-center font-bold">
+                    {i + 1}
+                  </span>
+                  <span className="leading-snug">{step}</span>
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+
+        {/* Tips */}
+        {exercise.tips && (
+          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 mb-3">
+            <p className="text-green-300 text-sm">💡 {exercise.tips}</p>
           </div>
         )}
 

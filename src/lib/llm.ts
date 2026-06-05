@@ -8,12 +8,13 @@ const WORKOUT_SCHEMA = `{
   "exercises": [
     {
       "name": "string",
-      "equipment": "string (the primary piece of equipment required, e.g. 'barbell', 'dumbbell', 'bodyweight', 'treadmill')",
+      "equipment": "string (primary equipment required, e.g. 'barbell', 'dumbbell', 'bodyweight', 'treadmill')",
       "sets": number (optional),
       "reps": number (optional),
       "duration_seconds": number (optional),
       "rest_seconds": number,
-      "notes": "string (optional)"
+      "instructions": ["string (step 1)", "string (step 2)", ...] (3-5 concise steps on how to perform the exercise),
+      "tips": "string (one key coaching tip or common mistake to avoid)"
     }
   ]
 }`
@@ -25,7 +26,8 @@ const EXERCISE_SCHEMA = `{
   "reps": number (optional),
   "duration_seconds": number (optional),
   "rest_seconds": number,
-  "notes": "string (optional)"
+  "instructions": ["string", ...],
+  "tips": "string"
 }`
 
 // Equipment descriptions to help the LLM generate appropriate exercises

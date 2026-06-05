@@ -30,8 +30,10 @@ export interface Exercise {
   reps?: number
   duration_seconds?: number
   rest_seconds: number
-  notes?: string
   equipment?: string
+  instructions?: string[]
+  tips?: string
+  notes?: string
   gif_url?: string
   description?: string
   muscle_groups?: string[]
