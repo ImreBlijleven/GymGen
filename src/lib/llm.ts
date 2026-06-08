@@ -70,7 +70,8 @@ Rules:
 - Always include rest_seconds for every exercise (0 for cardio steady-state)
 - Add notes when exercise form or machine setup matters
 - Total exercise time should fit within duration_minutes
-- Prefer common exercise names (e.g. "Barbell Bench Press", "Pull-up", "Squat") for better image matching`
+- Prefer common exercise names (e.g. "Barbell Bench Press", "Pull-up", "Squat") for better image matching
+- Always use metric units: kg for weight, km/h for speed, km for distance, meters for height`
 }
 
 function buildChoicesPrompt(choices: ChoicesInput): string {

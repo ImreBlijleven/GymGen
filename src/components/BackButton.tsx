@@ -1,10 +1,13 @@
 'use client'
 import { useRouter } from 'next/navigation'
 
-export default function BackButton() {
+export default function BackButton({ href }: { href?: string } = {}) {
   const router = useRouter()
   return (
-    <button onClick={() => router.back()} className="text-[var(--muted)] hover:text-white mb-4 text-sm transition-colors">
+    <button
+      onClick={() => (href ? router.push(href) : router.back())}
+      className="text-[var(--muted)] hover:text-white mb-4 text-sm transition-colors"
+    >
       ← Back
     </button>
   )

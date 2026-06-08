@@ -93,7 +93,7 @@ export default function SavedPage() {
 
   return (
     <main className="flex-1 flex flex-col max-w-lg mx-auto w-full px-4 py-6">
-      <BackButton />
+      <BackButton href="/" />
       <h2 className="text-2xl font-bold text-white mb-6">Saved Workouts</h2>
 
       {saved.length === 0 ? (
