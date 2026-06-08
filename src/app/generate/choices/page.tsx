@@ -6,7 +6,7 @@ import BackButton from '@/components/BackButton'
 import type { ChoicesInput, MuscleGroup, Location, Intensity } from '@/lib/types'
 
 const MUSCLE_GROUPS: MuscleGroup[] = ['chest', 'back', 'legs', 'shoulders', 'arms', 'core', 'full body', 'cardio']
-const DURATIONS = [15, 30, 45, 60] as const
+const DURATIONS = [15, 30, 45, 60, 90] as const
 const LOCATIONS: { value: Location; label: string }[] = [
   { value: 'gym', label: '🏋️ Gym' },
   { value: 'home', label: '🏠 Home' },

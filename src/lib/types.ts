@@ -91,7 +91,7 @@ export interface WgerExercise {
 }
 
 export interface ChoicesInput {
-  duration: 15 | 30 | 45 | 60
+  duration: 15 | 30 | 45 | 60 | 90
   location: Location
   muscle_groups: MuscleGroup[]
   intensity: Intensity
