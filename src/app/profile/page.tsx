@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import BackButton from '@/components/BackButton'
-import type { Profile, FitnessLevel } from '@/lib/types'
+import type { Profile, FitnessLevel, Gender } from '@/lib/types'
 import { EQUIPMENT_GROUPS } from '@/lib/exerciseDB'
 
 export default function ProfilePage() {
@@ -96,6 +96,39 @@ export default function ProfilePage() {
               </button>
             ))}
           </div>
+        </Field>
+
+        <Field label="Gender">
+          <div className="flex gap-2 flex-wrap">
+            {([
+              { value: 'male', label: 'Male' },
+              { value: 'female', label: 'Female' },
+              { value: 'other', label: 'Other' },
+              { value: 'prefer_not_to_say', label: 'Prefer not to say' },
+            ] as { value: Gender; label: string }[]).map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setProfile(p => ({ ...p, gender: opt.value }))}
+                className={`py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
+                  profile.gender === opt.value
+                    ? 'bg-green-500/20 border-green-500 text-green-400'
+                    : 'bg-[var(--surface)] border-[var(--border)] text-white'
+                }`}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        </Field>
+
+        <Field label="Other preferences">
+          <textarea
+            value={profile.preferences ?? ''}
+            onChange={e => setProfile(p => ({ ...p, preferences: e.target.value || null }))}
+            placeholder="e.g. I have a bad knee, prefer low-impact cardio, no overhead pressing…"
+            rows={3}
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors resize-none"
+          />
         </Field>
 
         <Field label="Available Equipment">

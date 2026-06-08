@@ -52,12 +52,17 @@ function buildSystemPrompt(profile: Partial<Profile> | null): string {
     ? equipment.map(e => `  - ${e}${EQUIPMENT_CONTEXT[e] ? ': ' + EQUIPMENT_CONTEXT[e] : ''}`).join('\n')
     : '  - bodyweight only'
 
+  const genderLabel: Record<string, string> = {
+    male: 'male', female: 'female', other: 'non-binary/other', prefer_not_to_say: 'not specified',
+  }
+
   return `You are an expert personal trainer with deep knowledge of exercise science.
 User profile:
   - Fitness level: ${profile?.fitness_level ?? 'intermediate'}
   - Age: ${profile?.age ? profile.age + ' years' : 'not specified'}
+  - Gender: ${profile?.gender ? genderLabel[profile.gender] ?? 'not specified' : 'not specified'}
   - Available equipment:
-${equipmentLines}
+${equipmentLines}${profile?.preferences ? `\n  - Additional preferences: ${profile.preferences}` : ''}
 Today's date: ${new Date().toISOString().split('T')[0]}.
 
 IMPORTANT: You must respond with ONLY valid JSON matching this exact schema — no prose, no markdown fences, no extra text:

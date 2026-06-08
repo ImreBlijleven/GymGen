@@ -48,12 +48,16 @@ export interface WorkoutPlan {
   exercises: Exercise[]
 }
 
+export type Gender = 'male' | 'female' | 'other' | 'prefer_not_to_say'
+
 export interface Profile {
   id: string
   name: string | null
   age: number | null
   fitness_level: FitnessLevel
   default_equipment: string[]
+  gender: Gender | null
+  preferences: string | null
 }
 
 export interface Workout {
