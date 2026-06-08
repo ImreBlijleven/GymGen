@@ -19,6 +19,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   const [exerciseData, setExerciseData] = useState<Record<string, ExerciseEnriched>>({})
   const [restTimer, setRestTimer] = useState<number | null>(null)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved'>('idle')
+  const [showFinishModal, setShowFinishModal] = useState(false)
   const [wakeLockSupported, setWakeLockSupported] = useState(false)
 
   useEffect(() => {
@@ -192,7 +193,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           <button
             onClick={() => {
               if (isLast) {
-                router.push('/')
+                setShowFinishModal(true)
               } else {
                 setRestTimer(exercise.rest_seconds)
                 setCurrentIndex(i => i + 1)
@@ -209,6 +210,40 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
         <p className="text-center text-xs text-[var(--muted)] pb-2">
           Keep your screen on manually to avoid lock
         </p>
+      )}
+
+      {/* Finish modal */}
+      {showFinishModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-end justify-center z-50 px-4 pb-8">
+          <div className="bg-[var(--surface)] border border-[var(--border)] rounded-3xl w-full max-w-lg p-6 flex flex-col gap-4">
+            <div className="text-center">
+              <p className="text-4xl mb-3">🎉</p>
+              <h3 className="text-xl font-bold text-white">Workout done!</h3>
+              <p className="text-[var(--muted)] text-sm mt-1">Do you want to save this workout?</p>
+            </div>
+
+            {saveStatus === 'saved' ? (
+              <div className="text-center py-2">
+                <p className="text-green-400 font-medium">✓ Saved</p>
+              </div>
+            ) : (
+              <button
+                onClick={async () => { await saveWorkout() }}
+                disabled={saveStatus === 'saving'}
+                className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded-2xl py-3 text-base transition-colors"
+              >
+                {saveStatus === 'saving' ? 'Saving…' : 'Save workout'}
+              </button>
+            )}
+
+            <button
+              onClick={() => router.push('/')}
+              className="w-full text-[var(--muted)] hover:text-white py-2 text-sm transition-colors"
+            >
+              {saveStatus === 'saved' ? 'Back to home' : 'Skip, go home'}
+            </button>
+          </div>
+        </div>
       )}
     </main>
   )
