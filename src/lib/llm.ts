@@ -187,6 +187,55 @@ export async function generateFromChat(
   return generateWithFallback(buildSystemPrompt(profile), buildChatPrompt(message))
 }
 
+export async function generateExerciseFromDescription(
+  plan: WorkoutPlan,
+  description: string,
+  profile: Partial<Profile> | null,
+): Promise<Exercise> {
+  const systemPrompt = buildSystemPrompt(profile)
+  const userPrompt = `Here is the current workout plan:
+${JSON.stringify(plan, null, 2)}
+
+The user wants to add a new exercise matching this description: "${description}"
+
+Generate ONE exercise that:
+- Matches the user's description as closely as possible
+- Fits the overall workout style, intensity, and equipment
+- Is NOT already in the plan
+
+Respond with ONLY valid JSON matching this exact schema — no prose, no markdown:
+${EXERCISE_SCHEMA}`
+
+  const parse = (text: string): Exercise => {
+    const json = text.trim().replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
+    return JSON.parse(json) as Exercise
+  }
+
+  try {
+    const { GoogleGenerativeAI } = await import('@google/generative-ai')
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', systemInstruction: systemPrompt })
+    const result = await model.generateContent(userPrompt)
+    return parse(result.response.text())
+  } catch {
+    try {
+      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
+          temperature: 0.7,
+        }),
+      })
+      const data = await response.json()
+      return parse(data.choices[0].message.content)
+    } catch {
+      throw new Error('Failed to generate exercise')
+    }
+  }
+}
+
 export async function generateSwapExercise(
   plan: WorkoutPlan,
   exerciseIndex: number,
