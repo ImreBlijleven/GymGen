@@ -20,7 +20,7 @@ export type Equipment =
   // Cardio machines
   | 'treadmill' | 'elliptical' | 'stationary bike' | 'rowing machine' | 'stair climber' | 'air bike'
   // Strength machines
-  | 'squat rack' | 'smith machine' | 'leg press' | 'lat pulldown' | 'chest press machine' | 'cable machine' | 'machine'
+  | 'squat rack' | 'smith machine' | 'leg press' | 'lat pulldown' | 'chest press machine' | 'cable machine'
   // Other
   | 'exercise ball' | 'medicine ball' | 'foam roller'
 

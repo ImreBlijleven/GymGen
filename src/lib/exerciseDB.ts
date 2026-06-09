@@ -15,7 +15,7 @@ export const EQUIPMENT_GROUPS = [
   },
   {
     label: 'Strength Machines',
-    items: ['squat rack', 'smith machine', 'leg press', 'lat pulldown', 'chest press machine', 'cable machine', 'machine'],
+    items: ['squat rack', 'smith machine', 'leg press', 'lat pulldown', 'chest press machine', 'cable machine'],
   },
   {
     label: 'Other',
