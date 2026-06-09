@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, use } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { Workout, Exercise } from '@/lib/types'
 import { findGif } from '@/lib/exerciseGifs'
 
@@ -13,8 +13,12 @@ interface ExerciseEnriched {
 export default function WorkoutPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [workout, setWorkout] = useState<Workout | null>(null)
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const start = parseInt(searchParams.get('start') ?? '0') || 0
+    return start
+  })
   const [loading, setLoading] = useState(true)
   const [exerciseData, setExerciseData] = useState<Record<string, ExerciseEnriched>>({})
   const [restTimer, setRestTimer] = useState<number | null>(null)
@@ -112,7 +116,15 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
         <div className="w-full bg-[var(--border)] rounded-full h-1">
           <div className="bg-green-500 h-1 rounded-full transition-all" style={{ width: `${progress}%` }} />
         </div>
-        <h2 className="text-base text-[var(--muted)] mt-2">{workout.title}</h2>
+        <div className="flex items-center justify-between mt-2">
+          <h2 className="text-base text-[var(--muted)]">{workout.title}</h2>
+          <button
+            onClick={() => router.push(`/workout/${id}/overview?resume=${currentIndex}`)}
+            className="text-xs text-[var(--muted)] hover:text-white transition-colors"
+          >
+            Overview ↗
+          </button>
+        </div>
       </div>
 
       {/* Exercise */}

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, use, useCallback } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import type { Workout, Exercise } from '@/lib/types'
 import {
   DndContext,
@@ -32,9 +32,10 @@ interface SortableExerciseProps {
   swapping: boolean
   anySwapping: boolean
   onSwap: () => void
+  isCurrent?: boolean
 }
 
-function SortableExercise({ id, index, exercise, swapping, anySwapping, onSwap }: SortableExerciseProps) {
+function SortableExercise({ id, index, exercise, swapping, anySwapping, onSwap, isCurrent }: SortableExerciseProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id })
 
   const style = {
@@ -48,7 +49,7 @@ function SortableExercise({ id, index, exercise, swapping, anySwapping, onSwap }
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-[var(--surface)] border border-[var(--border)] rounded-2xl px-4 py-3 flex items-center gap-3 touch-none select-none"
+      className={`rounded-2xl px-4 py-3 flex items-center gap-3 touch-none select-none border ${isCurrent ? 'bg-green-500/10 border-green-500/40' : 'bg-[var(--surface)] border-[var(--border)]'}`}
     >
       {/* Drag handle */}
       <button
@@ -107,6 +108,8 @@ function SortableExercise({ id, index, exercise, swapping, anySwapping, onSwap }
 export default function WorkoutOverviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const resumeIndex = parseInt(searchParams.get('resume') ?? '0') || 0
   const [workout, setWorkout] = useState<Workout | null>(null)
   const [exercises, setExercises] = useState<Exercise[]>([])
   const [keys, setKeys] = useState<string[]>([])
@@ -251,18 +254,19 @@ export default function WorkoutOverviewPage({ params }: { params: Promise<{ id: 
                 swapping={swapping === i}
                 anySwapping={swapping !== null}
                 onSwap={() => swapExercise(i)}
+                isCurrent={i === resumeIndex && resumeIndex > 0}
               />
             ))}
           </div>
         </SortableContext>
       </DndContext>
 
-      {/* Begin button */}
+      {/* Begin / Resume button */}
       <button
-        onClick={() => router.push(`/workout/${id}`)}
+        onClick={() => router.push(`/workout/${id}${resumeIndex > 0 ? `?start=${resumeIndex}` : ''}`)}
         className="w-full bg-green-500 hover:bg-green-400 text-black font-bold rounded-2xl py-4 text-lg transition-colors active:scale-[0.98]"
       >
-        Begin Workout →
+        {resumeIndex > 0 ? `Resume at exercise ${resumeIndex + 1} →` : 'Begin Workout →'}
       </button>
     </main>
   )
