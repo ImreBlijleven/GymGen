@@ -55,20 +55,28 @@ export async function POST(request: NextRequest) {
 
   let plan
 
-  if (mode === 'choices') {
-    plan = await generateFromChoices(choices as ChoicesInput, profile)
-  } else if (mode === 'chat') {
-    plan = await generateFromChat(message as string, profile)
-  } else if (mode === 'saved' && variation && workout_id) {
-    const { data: workout } = await supabase
-      .from('workouts')
-      .select('plan')
-      .eq('id', workout_id)
-      .single()
-    if (!workout) return NextResponse.json({ error: 'Workout not found' }, { status: 404 })
-    plan = await generateVariation(workout.plan, profile)
-  } else {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+  try {
+    if (mode === 'choices') {
+      plan = await generateFromChoices(choices as ChoicesInput, profile)
+    } else if (mode === 'chat') {
+      plan = await generateFromChat(message as string, profile)
+    } else if (mode === 'saved' && variation && workout_id) {
+      const { data: workout } = await supabase
+        .from('workouts')
+        .select('plan')
+        .eq('id', workout_id)
+        .single()
+      if (!workout) return NextResponse.json({ error: 'Workout not found' }, { status: 404 })
+      plan = await generateVariation(workout.plan, profile)
+    } else {
+      return NextResponse.json({ error: 'Invalid request' }, { status: 400 })
+    }
+  } catch (e) {
+    console.error('[generate] LLM error:', e)
+    return NextResponse.json(
+      { error: e instanceof Error ? e.message : 'Failed to generate workout. Please try again.' },
+      { status: 502 },
+    )
   }
 
   return NextResponse.json({ plan })

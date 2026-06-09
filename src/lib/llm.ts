@@ -145,30 +145,17 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<Worko
   }
 }
 
-const FALLBACK_PLAN: WorkoutPlan = {
-  title: 'Quick Bodyweight Session',
-  duration_minutes: 30,
-  location: 'home',
-  muscle_groups: ['full body'],
-  exercises: [
-    { name: 'Jumping Jacks', sets: 3, reps: 30, rest_seconds: 30, notes: 'Warm up, keep a steady pace' },
-    { name: 'Push Up', sets: 3, reps: 10, rest_seconds: 60, notes: 'Keep core tight, elbows at 45°' },
-    { name: 'Bodyweight Squat', sets: 3, reps: 15, rest_seconds: 60, notes: 'Knees track over toes' },
-    { name: 'Plank', duration_seconds: 30, sets: 3, rest_seconds: 45, notes: 'Neutral spine, breathe steadily' },
-    { name: 'Mountain Climbers', sets: 3, reps: 20, rest_seconds: 45 },
-  ],
-}
 
 async function generateWithFallback(systemPrompt: string, userPrompt: string): Promise<WorkoutPlan> {
   try {
     return await callGemini(systemPrompt, userPrompt)
   } catch (e) {
-    console.warn('Gemini failed, trying Groq:', e)
+    console.error('[LLM] Gemini failed:', e)
     try {
       return await callGroq(systemPrompt, userPrompt)
     } catch (e2) {
-      console.warn('Groq failed, using fallback plan:', e2)
-      return FALLBACK_PLAN
+      console.error('[LLM] Groq failed:', e2)
+      throw new Error(`Both LLM providers failed. Gemini: ${e instanceof Error ? e.message : e}. Groq: ${e2 instanceof Error ? e2.message : e2}`)
     }
   }
 }
