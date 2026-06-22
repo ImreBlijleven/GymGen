@@ -104,7 +104,7 @@ async function callGemini(systemPrompt: string, userPrompt: string): Promise<Wor
   const { GoogleGenerativeAI } = await import('@google/generative-ai')
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
   const model = genAI.getGenerativeModel({
-    model: 'gemini-1.5-flash',
+    model: 'gemini-2.0-flash',
     systemInstruction: systemPrompt,
   })
   const result = await model.generateContent(userPrompt)
@@ -126,7 +126,7 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<Worko
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.1-8b-instant',
+      model: 'llama-3.3-70b-versatile',
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -134,14 +134,17 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<Worko
       temperature: 0.7,
     }),
   })
-  if (!response.ok) throw new Error(`Groq error: ${response.status}`)
+  if (!response.ok) {
+    const body = await response.text()
+    throw new Error(`Groq HTTP ${response.status}: ${body}`)
+  }
   const data = await response.json()
   const text = data.choices[0].message.content.trim()
   const json = text.replace(/^```(?:json)?\n?/, '').replace(/\n?```$/, '')
   try {
     return JSON.parse(json) as WorkoutPlan
   } catch {
-    throw new Error('Groq returned invalid JSON')
+    throw new Error(`Groq returned invalid JSON: ${text.slice(0, 200)}`)
   }
 }
 
@@ -210,7 +213,7 @@ ${EXERCISE_SCHEMA}`
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'llama-3.3-70b-versatile',
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
           temperature: 0.7,
         }),
@@ -262,7 +265,7 @@ ${EXERCISE_SCHEMA}`
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
+          model: 'llama-3.3-70b-versatile',
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
           temperature: 0.7,
         }),
