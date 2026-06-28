@@ -1,4 +1,4 @@
-import { WorkoutPlan, Exercise, ChoicesInput, Profile, Location, MuscleGroup } from './types'
+import { WorkoutPlan, Exercise, ChoicesInput, RunInput, SwimInput, Profile, Location, MuscleGroup } from './types'
 
 const WORKOUT_SCHEMA = `{
   "title": "string",
@@ -276,6 +276,105 @@ ${EXERCISE_SCHEMA}`
       throw new Error('Failed to generate swap exercise')
     }
   }
+}
+
+const RUN_SCHEMA = `{
+  "title": "string",
+  "duration_minutes": number,
+  "location": "outdoors|gym",
+  "muscle_groups": ["running"],
+  "exercises": [
+    {
+      "name": "string (e.g. 'Warm-up Jog', '4×800m Intervals', 'Tempo Pace', 'Cool-down Walk')",
+      "duration_seconds": number,
+      "rest_seconds": number,
+      "instructions": ["string", ...] (pacing/effort cues — 2-4 steps),
+      "tips": "string (one coaching cue)"
+    }
+  ]
+}`
+
+const SWIM_SCHEMA = `{
+  "title": "string",
+  "duration_minutes": number,
+  "location": "pool|open water",
+  "muscle_groups": ["swimming"],
+  "exercises": [
+    {
+      "name": "string (e.g. 'Freestyle Warm-up', '10×50m Sprints', 'Pull Buoy Set', 'Easy Cool-down')",
+      "sets": number (optional, for repeated sets like intervals),
+      "duration_seconds": number (duration of one set or the whole segment),
+      "rest_seconds": number,
+      "instructions": ["string", ...] (technique/pacing cues — 2-4 steps),
+      "tips": "string (one coaching cue)",
+      "notes": "string (optional distance, e.g. '50m per set')"
+    }
+  ]
+}`
+
+function buildRunSystemPrompt(): string {
+  return `You are an expert running coach. Generate structured run workouts as segments (warm-up, main set, cool-down).
+
+IMPORTANT: Respond with ONLY valid JSON matching this exact schema — no prose, no markdown fences:
+${RUN_SCHEMA}
+
+Rules:
+- All exercises use duration_seconds (no sets/reps for easy/tempo/long; intervals may use sets + duration_seconds per rep)
+- rest_seconds is 0 for continuous running segments; use it between intervals
+- location: use "gym" for treadmill, "outdoors" for road/trail/track
+- Always include a warm-up and cool-down segment
+- Pacing cues should reference effort level (e.g. conversational pace, 80% effort, race pace)
+- Total segment durations must add up to approximately duration_minutes`
+}
+
+function buildSwimSystemPrompt(): string {
+  return `You are an expert swim coach. Generate structured swim sessions as pool sets (warm-up, main set, cool-down).
+
+IMPORTANT: Respond with ONLY valid JSON matching this exact schema — no prose, no markdown fences:
+${SWIM_SCHEMA}
+
+Rules:
+- Use duration_seconds for each segment or set
+- For interval sets, use sets + duration_seconds (time per rep) + rest_seconds (rest between reps)
+- Add notes for distance when relevant (e.g. "50m per rep")
+- location: use "pool" for indoor/outdoor pool, "open water" for open water
+- Always include a warm-up and cool-down
+- Technique cues should be specific (e.g. high elbow catch, bilateral breathing)
+- Total duration should match duration_minutes`
+}
+
+function buildRunPrompt(input: RunInput): string {
+  const terrainLabel: Record<string, string> = {
+    road: 'road running', trail: 'trail running', track: 'track', treadmill: 'treadmill',
+  }
+  const typeLabel: Record<string, string> = {
+    easy: 'easy aerobic run', tempo: 'tempo run', interval: 'interval training', 'long run': 'long run',
+  }
+  return `Generate a ${input.duration}-minute ${typeLabel[input.run_type]} on ${terrainLabel[input.terrain]}.`
+}
+
+function buildSwimPrompt(input: SwimInput): string {
+  const focusLabel: Record<string, string> = {
+    fitness: 'general fitness', technique: 'technique and drills', endurance: 'endurance', speed: 'speed and sprints',
+  }
+  const venueLabel: Record<string, string> = {
+    'indoor pool': 'indoor pool', 'outdoor pool': 'outdoor pool', 'open water': 'open water',
+  }
+  return `Generate a ${input.duration}-minute swim session focused on ${focusLabel[input.focus]} in a ${venueLabel[input.venue]}.`
+}
+
+export async function generateRunPlan(
+  input: RunInput,
+  profile: Partial<Profile> | null,
+): Promise<WorkoutPlan> {
+  return generateWithFallback(buildRunSystemPrompt(), buildRunPrompt(input))
+}
+
+export async function generateSwimPlan(
+  input: SwimInput,
+  profile: Partial<Profile> | null,
+): Promise<WorkoutPlan> {
+  return generateWithFallback(buildSwimSystemPrompt(), buildSwimPrompt(input))
 }
 
 export async function generateVariation(

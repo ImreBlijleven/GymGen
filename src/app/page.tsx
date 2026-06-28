@@ -43,10 +43,30 @@ export default function Home() {
         <p className="text-[var(--muted)] text-sm">More gym. Less guessing.</p>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <ModeCard href="/generate/chat" icon="💬" title="Chat" description="Describe your workout in plain language" />
-        <ModeCard href="/generate/choices" icon="⚡" title="Quick Build" description="Answer 4 questions, get a plan instantly" />
-        <ModeCard href="/generate/saved" icon="📋" title="Saved Workouts" description="Resume a plan or request a variation" />
+      <div className="flex flex-col gap-8">
+        {/* GYM */}
+        <section>
+          <p className="text-xs text-[var(--muted)] uppercase tracking-widest font-medium mb-3">Gym</p>
+          <div className="flex flex-col gap-3">
+            <ModeCard href="/generate/chat" icon="💬" title="Chat" description="Describe your workout in plain language" />
+            <ModeCard href="/generate/choices" icon="⚡" title="Quick Build" description="Answer a few questions, get a plan instantly" />
+          </div>
+        </section>
+
+        {/* CARDIO */}
+        <section>
+          <p className="text-xs text-[var(--muted)] uppercase tracking-widest font-medium mb-3">Cardio</p>
+          <div className="flex flex-col gap-3">
+            <ModeCard href="/generate/run" icon="🏃" title="Running" description="Plan a run — easy, tempo, intervals, or long" />
+            <ModeCard href="/generate/swim" icon="🏊" title="Swimming" description="Build a swim session for any goal" />
+          </div>
+        </section>
+
+        {/* SAVED */}
+        <section>
+          <p className="text-xs text-[var(--muted)] uppercase tracking-widest font-medium mb-3">Library</p>
+          <ModeCard href="/generate/saved" icon="📋" title="Saved Workouts" description="Resume a plan or request a variation" />
+        </section>
       </div>
 
       <div className="mt-auto pt-8 flex justify-end">

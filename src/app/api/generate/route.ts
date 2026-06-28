@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
-import { generateFromChoices, generateFromChat, generateVariation } from '@/lib/llm'
-import { ChoicesInput } from '@/lib/types'
+import { generateFromChoices, generateFromChat, generateVariation, generateRunPlan, generateSwimPlan } from '@/lib/llm'
+import { ChoicesInput, RunInput, SwimInput } from '@/lib/types'
 
-const VALID_MODES = ['chat', 'choices', 'saved']
+const VALID_MODES = ['chat', 'choices', 'saved', 'run', 'swim']
 const MAX_MESSAGE_LENGTH = 500
 
 // Simple in-memory rate limiter: max 10 generations per user per minute
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { mode, message, choices, workout_id, variation } = body
+  const { mode, message, choices, run, swim, workout_id, variation } = body
 
   if (!VALID_MODES.includes(mode)) {
     return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
@@ -60,6 +60,10 @@ export async function POST(request: NextRequest) {
       plan = await generateFromChoices(choices as ChoicesInput, profile)
     } else if (mode === 'chat') {
       plan = await generateFromChat(message as string, profile)
+    } else if (mode === 'run') {
+      plan = await generateRunPlan(run as RunInput, profile)
+    } else if (mode === 'swim') {
+      plan = await generateSwimPlan(swim as SwimInput, profile)
     } else if (mode === 'saved' && variation && workout_id) {
       const { data: workout } = await supabase
         .from('workouts')

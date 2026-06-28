@@ -1,7 +1,11 @@
 export type FitnessLevel = 'beginner' | 'intermediate' | 'advanced'
-export type Location = 'gym' | 'home' | 'hotel' | 'outdoors'
+export type Location = 'gym' | 'home' | 'hotel' | 'outdoors' | 'pool' | 'open water'
 export type Intensity = 'light' | 'moderate' | 'hard'
-export type GenerationMode = 'chat' | 'choices' | 'saved'
+export type GenerationMode = 'chat' | 'choices' | 'saved' | 'run' | 'swim'
+export type RunType = 'easy' | 'tempo' | 'interval' | 'long run'
+export type RunTerrain = 'road' | 'trail' | 'track' | 'treadmill'
+export type SwimFocus = 'fitness' | 'technique' | 'endurance' | 'speed'
+export type SwimVenue = 'indoor pool' | 'outdoor pool' | 'open water'
 export type MuscleGroup =
   | 'chest'
   | 'back'
@@ -95,4 +99,16 @@ export interface ChoicesInput {
   location: Location
   muscle_groups: MuscleGroup[]
   intensity: Intensity
+}
+
+export interface RunInput {
+  duration: 20 | 30 | 45 | 60 | 90
+  run_type: RunType
+  terrain: RunTerrain
+}
+
+export interface SwimInput {
+  duration: 20 | 30 | 45 | 60
+  focus: SwimFocus
+  venue: SwimVenue
 }
