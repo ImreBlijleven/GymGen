@@ -42,9 +42,10 @@ export default function SwimPage() {
       const saveRes = await fetch('/api/workouts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ plan: data.plan, source: 'swim' }),
+        body: JSON.stringify({ plan: data.plan, source: 'choices' }),
       })
       const saved = await saveRes.json()
+      if (!saveRes.ok) throw new Error(saved.error || 'Failed to save workout')
       router.push(`/workout/${saved.workout.id}/overview`)
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : 'Something went wrong')
