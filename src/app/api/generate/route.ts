@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
   }
 
   const body = await request.json()
-  const { mode, message, choices, run, swim, workout_id, variation } = body
+  const { mode, message, choices, run, swim, session_context, workout_id, variation } = body
 
   if (!VALID_MODES.includes(mode)) {
     return NextResponse.json({ error: 'Invalid mode' }, { status: 400 })
@@ -61,9 +61,9 @@ export async function POST(request: NextRequest) {
     } else if (mode === 'chat') {
       plan = await generateFromChat(message as string, profile)
     } else if (mode === 'run') {
-      plan = await generateRunPlan(run as RunInput, profile)
+      plan = await generateRunPlan(run as RunInput, profile, session_context)
     } else if (mode === 'swim') {
-      plan = await generateSwimPlan(swim as SwimInput, profile)
+      plan = await generateSwimPlan(swim as SwimInput, profile, session_context)
     } else if (mode === 'saved' && variation && workout_id) {
       const { data: workout } = await supabase
         .from('workouts')

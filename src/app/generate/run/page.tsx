@@ -25,17 +25,18 @@ export default function RunPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [input, setInput] = useState<Partial<RunInput>>({})
+  const [sessionContext, setSessionContext] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function submit(final: RunInput) {
+  async function submit(final: RunInput, context?: string) {
     setLoading(true)
     setError(null)
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'run', run: final }),
+        body: JSON.stringify({ mode: 'run', run: final, session_context: context || undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -69,7 +70,7 @@ export default function RunPage() {
 
       {/* Progress */}
       <div className="flex gap-1 mb-8">
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2, 3].map(i => (
           <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-amber-500' : 'bg-[var(--border)]'}`} />
         ))}
       </div>
@@ -118,7 +119,7 @@ export default function RunPage() {
             {TERRAINS.map(t => (
               <button
                 key={t.value}
-                onClick={() => submit({ ...input, terrain: t.value } as RunInput)}
+                onClick={() => { setInput(i => ({ ...i, terrain: t.value })); setStep(3) }}
                 className="py-5 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-amber-500/50 transition-all active:scale-95 flex flex-col items-center gap-2"
               >
                 <span className="text-3xl">{t.icon}</span>
@@ -126,6 +127,30 @@ export default function RunPage() {
               </button>
             ))}
           </div>
+        </QuestionBlock>
+      )}
+
+      {step === 3 && (
+        <QuestionBlock title="Anything to add?">
+          <textarea
+            value={sessionContext}
+            onChange={e => setSessionContext(e.target.value)}
+            placeholder="e.g. training for a 10K next month, I tend to get shin splints…"
+            rows={4}
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 resize-none transition-colors mb-4"
+          />
+          <button
+            onClick={() => submit(input as RunInput, sessionContext)}
+            className="w-full bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-xl py-3 transition-colors mb-3"
+          >
+            Generate Run →
+          </button>
+          <button
+            onClick={() => submit(input as RunInput)}
+            className="w-full text-[var(--muted)] hover:text-white text-sm py-2 transition-colors"
+          >
+            Skip
+          </button>
         </QuestionBlock>
       )}
     </main>

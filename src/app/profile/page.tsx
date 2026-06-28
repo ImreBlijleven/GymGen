@@ -121,11 +121,31 @@ export default function ProfilePage() {
           </div>
         </Field>
 
-        <Field label="Other preferences">
+        <Field label="Gym preferences">
           <textarea
             value={profile.preferences ?? ''}
             onChange={e => setProfile(p => ({ ...p, preferences: e.target.value || null }))}
-            placeholder="e.g. I have a bad knee, prefer low-impact cardio, no overhead pressing…"
+            placeholder="e.g. bad knee, prefer low-impact cardio, no overhead pressing…"
+            rows={3}
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 transition-colors resize-none"
+          />
+        </Field>
+
+        <Field label="Running preferences">
+          <textarea
+            value={profile.run_preferences ?? ''}
+            onChange={e => setProfile(p => ({ ...p, run_preferences: e.target.value || null }))}
+            placeholder="e.g. training for a 10K, comfortable at 5:30/km, tend to get shin splints…"
+            rows={3}
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 transition-colors resize-none"
+          />
+        </Field>
+
+        <Field label="Swimming preferences">
+          <textarea
+            value={profile.swim_preferences ?? ''}
+            onChange={e => setProfile(p => ({ ...p, swim_preferences: e.target.value || null }))}
+            placeholder="e.g. intermediate level, only freestyle and backstroke, 25m pool…"
             rows={3}
             className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 transition-colors resize-none"
           />

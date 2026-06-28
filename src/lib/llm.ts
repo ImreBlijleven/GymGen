@@ -312,9 +312,14 @@ const SWIM_SCHEMA = `{
   ]
 }`
 
-function buildRunSystemPrompt(): string {
-  return `You are an expert running coach. Generate structured run workouts as segments (warm-up, main set, cool-down).
+function buildRunSystemPrompt(profile: Partial<Profile> | null): string {
+  const parts: string[] = []
+  if (profile?.fitness_level) parts.push(`Fitness level: ${profile.fitness_level}`)
+  if (profile?.age) parts.push(`Age: ${profile.age}`)
+  if (profile?.run_preferences) parts.push(`Runner context: ${profile.run_preferences}`)
 
+  return `You are an expert running coach. Generate structured run workouts as segments (warm-up, main set, cool-down).
+${parts.length ? `\nRunner profile:\n${parts.map(p => `  - ${p}`).join('\n')}\n` : ''}
 IMPORTANT: Respond with ONLY valid JSON matching this exact schema — no prose, no markdown fences:
 ${RUN_SCHEMA}
 
@@ -327,9 +332,14 @@ Rules:
 - Total segment durations must add up to approximately duration_minutes`
 }
 
-function buildSwimSystemPrompt(): string {
-  return `You are an expert swim coach. Generate structured swim sessions as pool sets (warm-up, main set, cool-down).
+function buildSwimSystemPrompt(profile: Partial<Profile> | null): string {
+  const parts: string[] = []
+  if (profile?.fitness_level) parts.push(`Fitness level: ${profile.fitness_level}`)
+  if (profile?.age) parts.push(`Age: ${profile.age}`)
+  if (profile?.swim_preferences) parts.push(`Swimmer context: ${profile.swim_preferences}`)
 
+  return `You are an expert swim coach. Generate structured swim sessions as pool sets (warm-up, main set, cool-down).
+${parts.length ? `\nSwimmer profile:\n${parts.map(p => `  - ${p}`).join('\n')}\n` : ''}
 IMPORTANT: Respond with ONLY valid JSON matching this exact schema — no prose, no markdown fences:
 ${SWIM_SCHEMA}
 
@@ -343,38 +353,44 @@ Rules:
 - Total duration should match duration_minutes`
 }
 
-function buildRunPrompt(input: RunInput): string {
+function buildRunPrompt(input: RunInput, sessionContext?: string): string {
   const terrainLabel: Record<string, string> = {
     road: 'road running', trail: 'trail running', track: 'track', treadmill: 'treadmill',
   }
   const typeLabel: Record<string, string> = {
     easy: 'easy aerobic run', tempo: 'tempo run', interval: 'interval training', 'long run': 'long run',
   }
-  return `Generate a ${input.duration}-minute ${typeLabel[input.run_type]} on ${terrainLabel[input.terrain]}.`
+  let prompt = `Generate a ${input.duration}-minute ${typeLabel[input.run_type]} on ${terrainLabel[input.terrain]}.`
+  if (sessionContext) prompt += `\nExtra context from the user: ${sessionContext}`
+  return prompt
 }
 
-function buildSwimPrompt(input: SwimInput): string {
+function buildSwimPrompt(input: SwimInput, sessionContext?: string): string {
   const focusLabel: Record<string, string> = {
     fitness: 'general fitness', technique: 'technique and drills', endurance: 'endurance', speed: 'speed and sprints',
   }
   const venueLabel: Record<string, string> = {
     'indoor pool': 'indoor pool', 'outdoor pool': 'outdoor pool', 'open water': 'open water',
   }
-  return `Generate a ${input.duration}-minute swim session focused on ${focusLabel[input.focus]} in a ${venueLabel[input.venue]}.`
+  let prompt = `Generate a ${input.duration}-minute swim session focused on ${focusLabel[input.focus]} in a ${venueLabel[input.venue]}.`
+  if (sessionContext) prompt += `\nExtra context from the user: ${sessionContext}`
+  return prompt
 }
 
 export async function generateRunPlan(
   input: RunInput,
   profile: Partial<Profile> | null,
+  sessionContext?: string,
 ): Promise<WorkoutPlan> {
-  return generateWithFallback(buildRunSystemPrompt(), buildRunPrompt(input))
+  return generateWithFallback(buildRunSystemPrompt(profile), buildRunPrompt(input, sessionContext))
 }
 
 export async function generateSwimPlan(
   input: SwimInput,
   profile: Partial<Profile> | null,
+  sessionContext?: string,
 ): Promise<WorkoutPlan> {
-  return generateWithFallback(buildSwimSystemPrompt(), buildSwimPrompt(input))
+  return generateWithFallback(buildSwimSystemPrompt(profile), buildSwimPrompt(input, sessionContext))
 }
 
 export async function generateVariation(

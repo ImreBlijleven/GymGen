@@ -62,6 +62,8 @@ export interface Profile {
   default_equipment: string[]
   gender: Gender | null
   preferences: string | null
+  run_preferences: string | null
+  swim_preferences: string | null
 }
 
 export interface Workout {

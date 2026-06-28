@@ -24,17 +24,18 @@ export default function SwimPage() {
   const router = useRouter()
   const [step, setStep] = useState(0)
   const [input, setInput] = useState<Partial<SwimInput>>({})
+  const [sessionContext, setSessionContext] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  async function submit(final: SwimInput) {
+  async function submit(final: SwimInput, context?: string) {
     setLoading(true)
     setError(null)
     try {
       const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ mode: 'swim', swim: final }),
+        body: JSON.stringify({ mode: 'swim', swim: final, session_context: context || undefined }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
@@ -68,7 +69,7 @@ export default function SwimPage() {
 
       {/* Progress */}
       <div className="flex gap-1 mb-8">
-        {[0, 1, 2].map(i => (
+        {[0, 1, 2, 3].map(i => (
           <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-amber-500' : 'bg-[var(--border)]'}`} />
         ))}
       </div>
@@ -117,7 +118,7 @@ export default function SwimPage() {
             {VENUES.map(v => (
               <button
                 key={v.value}
-                onClick={() => submit({ ...input, venue: v.value } as SwimInput)}
+                onClick={() => { setInput(i => ({ ...i, venue: v.value })); setStep(3) }}
                 className="flex items-center gap-4 p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-amber-500/50 transition-all active:scale-95"
               >
                 <span className="text-3xl">{v.icon}</span>
@@ -125,6 +126,30 @@ export default function SwimPage() {
               </button>
             ))}
           </div>
+        </QuestionBlock>
+      )}
+
+      {step === 3 && (
+        <QuestionBlock title="Anything to add?">
+          <textarea
+            value={sessionContext}
+            onChange={e => setSessionContext(e.target.value)}
+            placeholder="e.g. I can only swim freestyle, 25m pool, training for an open water event…"
+            rows={4}
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 resize-none transition-colors mb-4"
+          />
+          <button
+            onClick={() => submit(input as SwimInput, sessionContext)}
+            className="w-full bg-amber-500 hover:bg-amber-400 text-black font-semibold rounded-xl py-3 transition-colors mb-3"
+          >
+            Generate Session →
+          </button>
+          <button
+            onClick={() => submit(input as SwimInput)}
+            className="w-full text-[var(--muted)] hover:text-white text-sm py-2 transition-colors"
+          >
+            Skip
+          </button>
         </QuestionBlock>
       )}
     </main>
