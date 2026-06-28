@@ -75,7 +75,7 @@ export default function ChoicesPage() {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
         <p className="text-[var(--muted)]">Building your workout…</p>
       </div>
     )
@@ -88,7 +88,7 @@ export default function ChoicesPage() {
       <div className="mb-6">
         <div className="flex gap-1 mb-4">
           {[0, 1, 2, 3].map(i => (
-            <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-green-500' : 'bg-[var(--border)]'}`} />
+            <div key={i} className={`flex-1 h-1 rounded-full transition-colors ${i <= step ? 'bg-amber-500' : 'bg-[var(--border)]'}`} />
           ))}
         </div>
       </div>
@@ -124,7 +124,7 @@ export default function ChoicesPage() {
                 onClick={() => toggleMuscle(m)}
                 className={`py-3 px-4 rounded-xl border text-sm font-medium capitalize transition-all ${
                   (choices.muscle_groups ?? []).includes(m)
-                    ? 'bg-green-500/20 border-green-500 text-green-400'
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-400'
                     : 'bg-[var(--surface)] border-[var(--border)] text-white'
                 }`}
               >
@@ -135,7 +135,7 @@ export default function ChoicesPage() {
           <button
             onClick={confirmMuscles}
             disabled={(choices.muscle_groups ?? []).length === 0}
-            className="w-full mt-4 bg-green-500 hover:bg-green-400 disabled:opacity-30 text-black font-semibold rounded-xl py-3 transition-colors"
+            className="w-full mt-4 bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-black font-semibold rounded-xl py-3 transition-colors"
           >
             Next →
           </button>
@@ -149,7 +149,7 @@ export default function ChoicesPage() {
               <button
                 key={i.value}
                 onClick={() => pick('intensity', i.value)}
-                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-green-500/50 transition-all"
+                className="flex items-center justify-between p-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-amber-500/50 transition-all"
               >
                 <div className="text-left">
                   <div className="font-medium text-white">{i.label}</div>
@@ -178,7 +178,7 @@ function OptionButton({ label, onClick }: { label: string; onClick: () => void }
   return (
     <button
       onClick={onClick}
-      className="py-4 px-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-green-500/50 text-white font-medium transition-all active:scale-95"
+      className="py-4 px-4 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-amber-500/50 text-white font-medium transition-all active:scale-95"
     >
       {label}
     </button>

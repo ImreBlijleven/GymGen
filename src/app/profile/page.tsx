@@ -49,7 +49,7 @@ export default function ProfilePage() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
       </div>
     )
   }
@@ -66,7 +66,7 @@ export default function ProfilePage() {
             value={profile.name ?? ''}
             onChange={e => setProfile(p => ({ ...p, name: e.target.value }))}
             placeholder="Your name"
-            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 transition-colors"
           />
         </Field>
 
@@ -76,7 +76,7 @@ export default function ProfilePage() {
             value={profile.age ?? ''}
             onChange={e => setProfile(p => ({ ...p, age: parseInt(e.target.value) || undefined }))}
             placeholder="e.g. 28"
-            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors"
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 transition-colors"
           />
         </Field>
 
@@ -88,7 +88,7 @@ export default function ProfilePage() {
                 onClick={() => setProfile(p => ({ ...p, fitness_level: level }))}
                 className={`flex-1 py-2.5 rounded-xl border text-sm font-medium capitalize transition-all ${
                   profile.fitness_level === level
-                    ? 'bg-green-500/20 border-green-500 text-green-400'
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-400'
                     : 'bg-[var(--surface)] border-[var(--border)] text-white'
                 }`}
               >
@@ -111,7 +111,7 @@ export default function ProfilePage() {
                 onClick={() => setProfile(p => ({ ...p, gender: opt.value }))}
                 className={`py-2.5 px-4 rounded-xl border text-sm font-medium transition-all ${
                   profile.gender === opt.value
-                    ? 'bg-green-500/20 border-green-500 text-green-400'
+                    ? 'bg-amber-500/20 border-amber-500 text-amber-400'
                     : 'bg-[var(--surface)] border-[var(--border)] text-white'
                 }`}
               >
@@ -127,7 +127,7 @@ export default function ProfilePage() {
             onChange={e => setProfile(p => ({ ...p, preferences: e.target.value || null }))}
             placeholder="e.g. I have a bad knee, prefer low-impact cardio, no overhead pressing…"
             rows={3}
-            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 transition-colors resize-none"
+            className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 transition-colors resize-none"
           />
         </Field>
 
@@ -143,7 +143,7 @@ export default function ProfilePage() {
                       onClick={() => toggleEquipment(item)}
                       className={`py-2.5 px-3 rounded-xl border text-sm capitalize transition-all text-left ${
                         (profile.default_equipment ?? []).includes(item)
-                          ? 'bg-green-500/20 border-green-500 text-green-400'
+                          ? 'bg-amber-500/20 border-amber-500 text-amber-400'
                           : 'bg-[var(--surface)] border-[var(--border)] text-white'
                       }`}
                     >
@@ -159,7 +159,7 @@ export default function ProfilePage() {
         <button
           onClick={save}
           disabled={saving}
-          className="bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-semibold rounded-xl py-3 transition-colors"
+          className="bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-semibold rounded-xl py-3 transition-colors"
         >
           {saved ? '✓ Saved' : saving ? 'Saving…' : 'Save Profile'}
         </button>

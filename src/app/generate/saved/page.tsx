@@ -86,7 +86,7 @@ export default function SavedPage() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
       </div>
     )
   }
@@ -121,12 +121,12 @@ export default function SavedPage() {
                       if (e.key === 'Enter') confirmRename(entry.id)
                       if (e.key === 'Escape') setEditingId(null)
                     }}
-                    className="flex-1 bg-[var(--surface-2)] border border-green-500 rounded-lg px-3 py-1 text-white text-sm focus:outline-none"
+                    className="flex-1 bg-[var(--surface-2)] border border-amber-500 rounded-lg px-3 py-1 text-white text-sm focus:outline-none"
                   />
                 ) : (
                   <button
                     onClick={() => startEdit(entry)}
-                    className="font-semibold text-white text-left hover:text-green-400 transition-colors"
+                    className="font-semibold text-white text-left hover:text-amber-400 transition-colors"
                   >
                     {entry.name}
                   </button>
@@ -177,7 +177,7 @@ export default function SavedPage() {
               <div className="flex gap-2">
                 <button
                   onClick={() => router.push(`/workout/${entry.workout.id}`)}
-                  className="flex-1 bg-green-500 hover:bg-green-400 text-black font-medium rounded-xl py-2 text-sm transition-colors"
+                  className="flex-1 bg-amber-500 hover:bg-amber-400 text-black font-medium rounded-xl py-2 text-sm transition-colors"
                 >
                   Start
                 </button>

@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import AuthForm from '@/components/AuthForm'
+import { DumbbellLogo } from '@/components/DumbbellLogo'
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -25,7 +26,7 @@ export default function Home() {
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
       </div>
     )
   }
@@ -35,8 +36,11 @@ export default function Home() {
   return (
     <main className="flex-1 flex flex-col max-w-lg mx-auto w-full px-4 py-8">
       <div className="mb-10">
-        <h1 className="text-3xl font-bold text-white">GymGen</h1>
-        <p className="text-[var(--muted)] mt-1">Your AI workout generator</p>
+        <div className="flex items-center gap-3 mb-2">
+          <DumbbellLogo size={30} />
+          <h1 className="text-3xl font-bold text-white">GymGen</h1>
+        </div>
+        <p className="text-[var(--muted)] text-sm">More gym. Less guessing.</p>
       </div>
 
       <div className="flex flex-col gap-4">
@@ -56,7 +60,7 @@ export default function Home() {
 
 function ModeCard({ href, icon, title, description }: { href: string; icon: string; title: string; description: string }) {
   return (
-    <Link href={href} className="block p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-green-500/50 active:scale-[0.98] transition-all">
+    <Link href={href} className="block p-5 rounded-2xl bg-[var(--surface)] border border-[var(--border)] hover:border-amber-500/50 active:scale-[0.98] transition-all">
       <div className="flex items-center gap-4">
         <span className="text-3xl">{icon}</span>
         <div>

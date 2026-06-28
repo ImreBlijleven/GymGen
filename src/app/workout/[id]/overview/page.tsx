@@ -49,7 +49,7 @@ function SortableExercise({ id, index, exercise, swapping, anyBusy, isCurrent, o
     <div
       ref={setNodeRef}
       style={style}
-      className={`rounded-2xl px-4 py-3 flex items-center gap-3 touch-none select-none border ${isCurrent ? 'bg-green-500/10 border-green-500/40' : 'bg-[var(--surface)] border-[var(--border)]'}`}
+      className={`rounded-2xl px-4 py-3 flex items-center gap-3 touch-none select-none border ${isCurrent ? 'bg-amber-500/10 border-amber-500/40' : 'bg-[var(--surface)] border-[var(--border)]'}`}
     >
       {/* Drag handle */}
       <button
@@ -91,7 +91,7 @@ function SortableExercise({ id, index, exercise, swapping, anyBusy, isCurrent, o
       >
         {swapping ? (
           <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-full border border-green-500 border-t-transparent animate-spin inline-block" />
+            <span className="w-3 h-3 rounded-full border border-amber-500 border-t-transparent animate-spin inline-block" />
             Swapping
           </span>
         ) : 'Swap'}
@@ -134,7 +134,7 @@ function AddRow({ insertIndex, isOpen, isLoading, onOpen, onCancel, onSubmit }: 
 
   if (isOpen) {
     return (
-      <div className="bg-[var(--surface)] border border-green-500/40 rounded-2xl px-4 py-3 flex gap-2 items-center">
+      <div className="bg-[var(--surface)] border border-amber-500/40 rounded-2xl px-4 py-3 flex gap-2 items-center">
         <input
           ref={inputRef}
           value={desc}
@@ -147,13 +147,13 @@ function AddRow({ insertIndex, isOpen, isLoading, onOpen, onCancel, onSubmit }: 
           className="flex-1 bg-transparent text-white text-sm placeholder:text-[var(--muted)] focus:outline-none"
         />
         {isLoading ? (
-          <span className="w-4 h-4 rounded-full border-2 border-green-500 border-t-transparent animate-spin shrink-0" />
+          <span className="w-4 h-4 rounded-full border-2 border-amber-500 border-t-transparent animate-spin shrink-0" />
         ) : (
           <>
             <button
               onClick={() => desc.trim() && onSubmit(desc.trim())}
               disabled={!desc.trim()}
-              className="text-xs text-green-400 hover:text-green-300 font-medium disabled:opacity-40 shrink-0"
+              className="text-xs text-amber-400 hover:text-amber-300 font-medium disabled:opacity-40 shrink-0"
             >
               Add
             </button>
@@ -169,12 +169,12 @@ function AddRow({ insertIndex, isOpen, isLoading, onOpen, onCancel, onSubmit }: 
   return (
     <button
       onClick={onOpen}
-      className="w-full flex items-center justify-center gap-1.5 py-1 text-[var(--muted)] hover:text-green-400 transition-colors group"
+      className="w-full flex items-center justify-center gap-1.5 py-1 text-[var(--muted)] hover:text-amber-400 transition-colors group"
       aria-label={`Add exercise at position ${insertIndex + 1}`}
     >
-      <span className="w-4 h-px bg-[var(--border)] group-hover:bg-green-500/40 transition-colors flex-1" />
+      <span className="w-4 h-px bg-[var(--border)] group-hover:bg-amber-500/40 transition-colors flex-1" />
       <span className="text-xs font-bold">+</span>
-      <span className="w-4 h-px bg-[var(--border)] group-hover:bg-green-500/40 transition-colors flex-1" />
+      <span className="w-4 h-px bg-[var(--border)] group-hover:bg-amber-500/40 transition-colors flex-1" />
     </button>
   )
 }
@@ -288,7 +288,7 @@ export default function WorkoutOverviewPage({ params }: { params: Promise<{ id: 
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
       </div>
     )
   }
@@ -297,7 +297,7 @@ export default function WorkoutOverviewPage({ params }: { params: Promise<{ id: 
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3">
         <p className="text-white">Workout not found</p>
-        <button onClick={() => router.push('/')} className="text-green-500 text-sm">Go home</button>
+        <button onClick={() => router.push('/')} className="text-amber-500 text-sm">Go home</button>
       </div>
     )
   }
@@ -379,7 +379,7 @@ export default function WorkoutOverviewPage({ params }: { params: Promise<{ id: 
       {/* Begin / Resume */}
       <button
         onClick={() => router.push(`/workout/${id}${resumeIndex > 0 ? `?start=${resumeIndex}` : ''}`)}
-        className="w-full bg-green-500 hover:bg-green-400 text-black font-bold rounded-2xl py-4 text-lg transition-colors active:scale-[0.98]"
+        className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-2xl py-4 text-lg transition-colors active:scale-[0.98]"
       >
         {resumeIndex > 0 ? `Resume at exercise ${resumeIndex + 1} →` : 'Begin Workout →'}
       </button>

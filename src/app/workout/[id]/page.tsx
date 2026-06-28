@@ -78,7 +78,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
   if (loading) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-8 h-8 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-8 h-8 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
       </div>
     )
   }
@@ -87,7 +87,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-3">
         <p className="text-white">Workout not found</p>
-        <button onClick={() => router.push('/')} className="text-green-500 text-sm">Go home</button>
+        <button onClick={() => router.push('/')} className="text-amber-500 text-sm">Go home</button>
       </div>
     )
   }
@@ -108,13 +108,13 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
           <button
             onClick={saveWorkout}
             disabled={saveStatus !== 'idle'}
-            className="text-sm text-green-400 disabled:text-[var(--muted)]"
+            className="text-sm text-amber-400 disabled:text-[var(--muted)]"
           >
             {saveStatus === 'saved' ? '✓ Saved' : saveStatus === 'saving' ? 'Saving…' : 'Save'}
           </button>
         </div>
         <div className="w-full bg-[var(--border)] rounded-full h-1">
-          <div className="bg-green-500 h-1 rounded-full transition-all" style={{ width: `${progress}%` }} />
+          <div className="bg-amber-500 h-1 rounded-full transition-all" style={{ width: `${progress}%` }} />
         </div>
         <div className="flex items-center justify-between mt-2">
           <h2 className="text-base text-[var(--muted)]">{workout.title}</h2>
@@ -144,7 +144,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
         {/* Exercise GIF */}
         {!enriched || enriched.gifLoading ? (
           <div className="rounded-2xl bg-[var(--surface)] mb-4 aspect-video flex items-center justify-center">
-            <div className="w-6 h-6 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+            <div className="w-6 h-6 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
           </div>
         ) : enriched.gifUrl ? (
           <div className="rounded-2xl overflow-hidden bg-[var(--surface)] mb-4 aspect-video flex items-center justify-center">
@@ -169,7 +169,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
             <ol className="flex flex-col gap-2">
               {exercise.instructions!.map((step, i) => (
                 <li key={i} className="flex gap-3 text-sm text-white">
-                  <span className="shrink-0 w-5 h-5 rounded-full bg-green-500/20 text-green-400 text-xs flex items-center justify-center font-bold">
+                  <span className="shrink-0 w-5 h-5 rounded-full bg-amber-500/20 text-amber-400 text-xs flex items-center justify-center font-bold">
                     {i + 1}
                   </span>
                   <span className="leading-snug">{step}</span>
@@ -181,8 +181,8 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
         {/* Tips */}
         {exercise.tips && (
-          <div className="bg-green-500/10 border border-green-500/20 rounded-xl p-3 mb-3">
-            <p className="text-green-300 text-sm">💡 {exercise.tips}</p>
+          <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 mb-3">
+            <p className="text-amber-300 text-sm">💡 {exercise.tips}</p>
           </div>
         )}
 
@@ -193,7 +193,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
         {restTimer !== null && restTimer > 0 ? (
           <div className="text-center">
             <p className="text-[var(--muted)] text-sm mb-1">Rest</p>
-            <p className="text-4xl font-bold text-green-400 mb-3">{restTimer}s</p>
+            <p className="text-4xl font-bold text-amber-400 mb-3">{restTimer}s</p>
             <button
               onClick={() => setRestTimer(0)}
               className="text-sm text-[var(--muted)] hover:text-white"
@@ -211,7 +211,7 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
                 setCurrentIndex(i => i + 1)
               }
             }}
-            className="w-full bg-green-500 hover:bg-green-400 text-black font-bold rounded-2xl py-4 text-lg transition-colors active:scale-[0.98]"
+            className="w-full bg-amber-500 hover:bg-amber-400 text-black font-bold rounded-2xl py-4 text-lg transition-colors active:scale-[0.98]"
           >
             {isLast ? '🎉 Finish Workout' : 'Next Exercise →'}
           </button>
@@ -236,13 +236,13 @@ export default function WorkoutPage({ params }: { params: Promise<{ id: string }
 
             {saveStatus === 'saved' ? (
               <div className="text-center py-2">
-                <p className="text-green-400 font-medium">✓ Saved</p>
+                <p className="text-amber-400 font-medium">✓ Saved</p>
               </div>
             ) : (
               <button
                 onClick={async () => { await saveWorkout() }}
                 disabled={saveStatus === 'saving'}
-                className="w-full bg-green-500 hover:bg-green-400 disabled:opacity-50 text-black font-bold rounded-2xl py-3 text-base transition-colors"
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-black font-bold rounded-2xl py-3 text-base transition-colors"
               >
                 {saveStatus === 'saving' ? 'Saving…' : 'Save workout'}
               </button>

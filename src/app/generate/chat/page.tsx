@@ -47,7 +47,7 @@ export default function ChatPage() {
   if (loading) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center gap-4">
-        <div className="w-10 h-10 rounded-full border-2 border-green-500 border-t-transparent animate-spin" />
+        <div className="w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin" />
         <p className="text-[var(--muted)]">Building your workout…</p>
       </div>
     )
@@ -66,7 +66,7 @@ export default function ChatPage() {
           <button
             key={ex}
             onClick={() => setMessage(ex)}
-            className="text-left text-sm text-[var(--muted)] hover:text-white px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-green-500/30 transition-all"
+            className="text-left text-sm text-[var(--muted)] hover:text-white px-4 py-3 rounded-xl bg-[var(--surface)] border border-[var(--border)] hover:border-amber-500/30 transition-all"
           >
             &ldquo;{ex}&rdquo;
           </button>
@@ -80,13 +80,13 @@ export default function ChatPage() {
           onChange={e => setMessage(e.target.value)}
           placeholder="E.g. 30 minute push day at home…"
           rows={3}
-          className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-green-500 resize-none transition-colors"
+          className="w-full bg-[var(--surface)] border border-[var(--border)] rounded-xl px-4 py-3 text-white placeholder:text-[var(--muted)] focus:outline-none focus:border-amber-500 resize-none transition-colors"
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSubmit(e) } }}
         />
         <button
           type="submit"
           disabled={!message.trim()}
-          className="bg-green-500 hover:bg-green-400 disabled:opacity-30 text-black font-semibold rounded-xl py-3 transition-colors"
+          className="bg-amber-500 hover:bg-amber-400 disabled:opacity-30 text-black font-semibold rounded-xl py-3 transition-colors"
         >
           Generate Workout →
         </button>
