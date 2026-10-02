@@ -1,5 +1,8 @@
 import { WorkoutPlan, Exercise, ChoicesInput, RunInput, SwimInput, Profile, Location, MuscleGroup } from './types'
 
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.8-flash'
+const GROQ_MODEL = process.env.GROQ_MODEL || 'openai/gpt-oss-120b'
+
 const WORKOUT_SCHEMA = `{
   "title": "string",
   "duration_minutes": number,
@@ -104,7 +107,7 @@ async function callGemini(systemPrompt: string, userPrompt: string): Promise<Wor
   const { GoogleGenerativeAI } = await import('@google/generative-ai')
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.0-flash',
+    model: GEMINI_MODEL,
     systemInstruction: systemPrompt,
   })
   const result = await model.generateContent(userPrompt)
@@ -126,7 +129,7 @@ async function callGroq(systemPrompt: string, userPrompt: string): Promise<Worko
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: 'llama-3.3-70b-versatile',
+      model: GROQ_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         { role: 'user', content: userPrompt },
@@ -204,7 +207,7 @@ ${EXERCISE_SCHEMA}`
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai')
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', systemInstruction: systemPrompt })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL, systemInstruction: systemPrompt })
     const result = await model.generateContent(userPrompt)
     return parse(result.response.text())
   } catch {
@@ -213,7 +216,7 @@ ${EXERCISE_SCHEMA}`
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: GROQ_MODEL,
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
           temperature: 0.7,
         }),
@@ -256,7 +259,7 @@ ${EXERCISE_SCHEMA}`
   try {
     const { GoogleGenerativeAI } = await import('@google/generative-ai')
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!)
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash', systemInstruction: systemPrompt })
+    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL, systemInstruction: systemPrompt })
     const result = await model.generateContent(userPrompt)
     return parse(result.response.text())
   } catch {
@@ -265,7 +268,7 @@ ${EXERCISE_SCHEMA}`
         method: 'POST',
         headers: { 'Authorization': `Bearer ${process.env.GROQ_API_KEY}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
+          model: GROQ_MODEL,
           messages: [{ role: 'system', content: systemPrompt }, { role: 'user', content: userPrompt }],
           temperature: 0.7,
         }),
